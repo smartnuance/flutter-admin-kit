@@ -1,0 +1,21 @@
+views:
+  - id:
+      id: events
+      type: modelList
+    title: Events
+    menuItem:
+      title: All Events
+      svgSrc: assets/icons/menu_doc.svg
+      group: event-system
+  - id:
+      id: events
+      type: modelCreate
+    title: Create a new event
+    menuItem:
+      title: Create Event
+      svgSrc: assets/icons/menu_doc.svg
+      group: event-system
+menuGroups:
+  event-system:
+    title: Event System
+    description: Manage events & subscriptions
