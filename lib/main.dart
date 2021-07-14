@@ -48,13 +48,6 @@ class AdminApp extends ConsumerWidget {
     final ViewRouterDelegate delegate = ref.watch(routerDelegateProvider);
     final title = ref.watch(titleProvider).state;
 
-    ref.listen(
-      mainViewProvider,
-      (value) {
-        delegate.notify();
-      },
-    );
-
     final swatch = createMaterialColor(
       // CI primary color
       const Color(0xff36d39a),
@@ -207,7 +200,14 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutedView> {
   ViewRouterDelegate(
     this.ref,
-  );
+  ) {
+    ref.listen(
+      mainViewProvider,
+      (value) {
+        notifyListeners();
+      },
+    );
+  }
 
   late final ProviderRefBase ref;
 
@@ -220,11 +220,6 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
 
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
-
-  /// Expose [notifyListeners] outside of package.
-  void notify() {
-    super.notifyListeners();
-  }
 
   @override
   Future<void> setNewRoutePath(RoutedView configuration) async {
