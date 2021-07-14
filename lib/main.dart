@@ -197,19 +197,13 @@ class AdminRouteInformationParser extends RouteInformationParser<RoutedView> {
 final _navigatorKey = GlobalKey<NavigatorState>();
 
 class ViewRouterDelegate extends RouterDelegate<RoutedView>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutedView> {
+    with PopNavigatorRouterDelegateMixin<RoutedView> {
   ViewRouterDelegate(
     this.ref,
-  ) {
-    ref.listen(
-      mainViewProvider,
-      (value) {
-        notifyListeners();
-      },
-    );
-  }
+  );
 
   late final ProviderRefBase ref;
+  Function()? cancelSubscription;
 
   @override
   Widget build(BuildContext context) {
@@ -261,6 +255,16 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
   Future<bool> popRoute() async {
     final didPop = ref.read(viewStackProvider.notifier).pop();
     return SynchronousFuture(didPop);
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    cancelSubscription = ref.listen(mainViewProvider, (_) => listener());
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    cancelSubscription?.call();
   }
 }
 
