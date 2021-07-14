@@ -4,28 +4,23 @@ import 'package:admin/common_widgets/error_actions.dart';
 import 'package:admin/common_widgets/progress_status.dart';
 import 'package:admin/constants.dart';
 import 'package:admin/dialogs/show_alert_dialog.dart';
-import 'package:admin/dialogs/show_exception_alert_dialog.dart';
 import 'package:admin/views/auth/auth_provider.dart';
 import 'package:admin/views/auth/profile_button.dart';
 import 'package:admin/views/auth/sign_in/buttons.dart';
 import 'package:admin/views/auth/sign_in/sign_in_model.dart';
+import 'package:admin/views/auth/sign_in/sign_in_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:i18n_extension/default.i18n.dart';
 
 class SignInView extends ConsumerStatefulWidget {
-  const SignInView({Key? key, required this.model, this.onSignedIn})
-      : super(key: key);
-  final SignInModel model;
-  final VoidCallback? onSignedIn;
+  const SignInView({
+    Key? key,
+    this.onSignedIn,
+  }) : super(key: key);
 
-  factory SignInView.withAuth(Auth auth, {VoidCallback? onSignedIn}) {
-    return SignInView(
-      model: SignInModel(auth: auth),
-      onSignedIn: onSignedIn,
-    );
-  }
+  final VoidCallback? onSignedIn;
 
   @override
   _SignInViewState createState() => _SignInViewState();
@@ -36,154 +31,15 @@ class _SignInViewState extends ConsumerState<SignInView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  SignInModel get model => widget.model;
-
-  @override
-  void initState() {
-    super.initState();
-    // Temporary workaround to update state until a replacement for ChangeNotifierProvider is found
-    model.addListener(() => setState(() {}));
-  }
+  SignInForm get state => ref.watch(signInFormProvider);
+  SignInFormState get notifier => ref.watch(signInFormProvider.notifier);
 
   @override
   void dispose() {
-    model.dispose();
     _node.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  void _showSignInError(SignInModel model, dynamic exception) {
-    showExceptionAlertDialog(
-      context: context,
-      title: model.errorAlertTitle,
-      exception: exception,
-    );
-  }
-
-  Future<void> _submit() async {
-    try {
-      final bool success = await model.submit();
-      if (success) {
-        if (model.formType == SignInFormType.forgotPassword) {
-          await showAlertDialog(
-            context: context,
-            title: 'Reset link sent'.i18n,
-            content: 'Check your email to reset your password'.i18n,
-            defaultActionText: 'OK'.i18n,
-          );
-        } else {
-          if (widget.onSignedIn != null) {
-            widget.onSignedIn?.call();
-          }
-        }
-      }
-    } catch (e) {
-      _showSignInError(model, e);
-    }
-  }
-
-  void _emailEditingComplete() {
-    if (model.canSubmitEmail) {
-      _node.nextFocus();
-    }
-  }
-
-  void _passwordEditingComplete() {
-    if (!model.canSubmitEmail) {
-      _node.previousFocus();
-      return;
-    }
-    _submit();
-  }
-
-  void _updateFormType(SignInFormType formType) {
-    model.updateFormType(formType);
-    _emailController.clear();
-    _passwordController.clear();
-  }
-
-  Widget _buildEmailField() {
-    return TextFormField(
-      key: const Key('email'),
-      controller: _emailController,
-      decoration: InputDecoration(
-        labelText: 'Email'.i18n,
-        hintText: 'test@test.com'.i18n,
-        errorText: model.emailErrorText,
-        enabled: !model.isLoading,
-      ),
-      autocorrect: false,
-      textInputAction: TextInputAction.next,
-      keyboardType: TextInputType.emailAddress,
-      keyboardAppearance: Brightness.light,
-      onEditingComplete: _emailEditingComplete,
-      inputFormatters: <TextInputFormatter>[
-        model.emailInputFormatter,
-      ],
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return TextFormField(
-      key: const Key('password'),
-      controller: _passwordController,
-      decoration: InputDecoration(
-        labelText: model.passwordLabelText,
-        errorText: model.passwordErrorText,
-        enabled: !model.isLoading,
-      ),
-      obscureText: true,
-      autocorrect: false,
-      textInputAction: TextInputAction.done,
-      keyboardAppearance: Brightness.light,
-      onEditingComplete: _passwordEditingComplete,
-    );
-  }
-
-  Widget _buildContent() {
-    return FocusScope(
-      node: _node,
-      child: Form(
-        onChanged: () => model.updateWith(
-            email: _emailController.text, password: _passwordController.text),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            const SizedBox(height: 8.0),
-            _buildEmailField(),
-            if (model.formType != SignInFormType.forgotPassword) ...<Widget>[
-              const SizedBox(height: 8.0),
-              _buildPasswordField(),
-            ],
-            const SizedBox(height: 8.0),
-            SignInButton(
-              key: const Key('primary-button'),
-              text: model.primaryButtonText,
-              loading: model.isLoading,
-              onPressed: model.isLoading ? null : _submit,
-            ),
-            const SizedBox(height: 8.0),
-            TextButton(
-              key: const Key('secondary-button'),
-              child: Text(model.secondaryButtonText),
-              onPressed: model.isLoading
-                  ? null
-                  : () => _updateFormType(model.secondaryActionFormType),
-            ),
-            if (model.formType == SignInFormType.signIn)
-              TextButton(
-                key: const Key('tertiary-button'),
-                child: Text('Forgot password?'.i18n),
-                onPressed: model.isLoading
-                    ? null
-                    : () => _updateFormType(SignInFormType.forgotPassword),
-              ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -233,6 +89,193 @@ class _SignInViewState extends ConsumerState<SignInView> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _submit() async {
+    final bool success = await notifier.submit();
+    if (success) {
+      await state.maybeMap(
+        passwordReset: (value) async {
+          await showAlertDialog(
+            context: context,
+            title: 'Reset link sent'.i18n,
+            content:
+                'If the email entered is assigned to an account you will receive an email to reset your password'
+                    .i18n,
+            defaultActionText: 'OK'.i18n,
+          );
+        },
+        orElse: () {
+          widget.onSignedIn?.call();
+        },
+      );
+    } else {
+      final desiresPasswordReset = await showAlertDialog(
+          context: context,
+          title: state.map(
+            login: (value) => 'Login failed'.i18n,
+            register: (value) => 'Registration failed'.i18n,
+            passwordReset: (value) => 'Password reset failed'.i18n,
+          ),
+          content: state.map(
+            login: (value) => 'Did you forget your password?'.i18n,
+            register: (value) =>
+                'Please contact us that we can help you with the registration.'
+                    .i18n,
+            passwordReset: (value) =>
+                'Please contact us that we can help recovering your account.'
+                    .i18n,
+          ),
+          defaultActionText: 'Reset password'.i18n,
+          cancelActionText: 'Go back'.i18n);
+      if (desiresPasswordReset ?? false) {
+        notifier.switchToPasswordReset();
+      }
+    }
+    _passwordController.clear();
+  }
+
+  Widget _buildContent() {
+    return FocusScope(
+      node: _node,
+      child: Form(
+        onChanged: () => notifier.state = state.copyWith(
+            emailOrUsername: _emailController.text,
+            password: _passwordController.text),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const SizedBox(height: 8.0),
+            _buildEmailField(),
+            ...state.maybeMap(
+              passwordReset: (_) => [],
+              orElse: () => [
+                const SizedBox(height: 8.0),
+                _buildPasswordField(),
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            state.when(
+              login: (email, password, isLoading, submitted) => SignInButton(
+                key: const Key('primary-button'),
+                text: 'Log in'.i18n,
+                loading: isLoading,
+                onPressed: isLoading ? null : _submit,
+              ),
+              register: (email, password, isLoading, submitted) => SignInButton(
+                key: const Key('primary-button'),
+                text: 'Create an account'.i18n,
+                loading: isLoading,
+                onPressed: isLoading ? null : _submit,
+              ),
+              passwordReset: (email, password, isLoading, submitted) =>
+                  SignInButton(
+                key: const Key('primary-button'),
+                text: 'Send Reset Link'.i18n,
+                loading: isLoading,
+                onPressed: isLoading ? null : _submit,
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            ...state.map(
+              login: (value) => [
+                TextButton(
+                  key: const Key('secondary-button'),
+                  child: Text('Need an account? Register'.i18n),
+                  onPressed: state.isLoading
+                      ? null
+                      : () => notifier.switchToRegister(),
+                ),
+                TextButton(
+                  key: const Key('tertiary-button'),
+                  child: Text('Forgot your password? Reset it'.i18n),
+                  onPressed: state.isLoading
+                      ? null
+                      : () => notifier.switchToPasswordReset(),
+                ),
+              ],
+              register: (value) => [
+                TextButton(
+                  key: const Key('secondary-button'),
+                  child: Text('Back to login'.i18n),
+                  onPressed:
+                      state.isLoading ? null : () => notifier.switchToLogin(),
+                )
+              ],
+              passwordReset: (value) => [
+                TextButton(
+                  key: const Key('secondary-button'),
+                  child: Text('Back to login'.i18n),
+                  onPressed:
+                      state.isLoading ? null : () => notifier.switchToLogin(),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmailField() {
+    final bool showErrorText = state.submitted && !state.canSubmitEmail;
+
+    return TextFormField(
+      key: const Key('email'),
+      controller: _emailController,
+      decoration: InputDecoration(
+        labelText: 'Email or username'.i18n,
+        hintText: 'test@test.com'.i18n,
+        errorText: showErrorText
+            ? (state.emailOrUsername.isEmpty
+                ? 'Email can\'t be empty'.i18n
+                : 'Email is invalid'.i18n)
+            : null,
+        enabled: !state.isLoading,
+      ),
+      autocorrect: false,
+      textInputAction: TextInputAction.next,
+      keyboardType: TextInputType.emailAddress,
+      keyboardAppearance: Brightness.light,
+      onEditingComplete: () {
+        if (state.canSubmitEmail) {
+          _node.nextFocus();
+        }
+      },
+      inputFormatters: <TextInputFormatter>[
+        emailOrUsernameInputFormatter,
+      ],
+    );
+  }
+
+  Widget _buildPasswordField() {
+    final bool showErrorText = state.submitted && !state.canSubmitPassword;
+    return TextFormField(
+      key: const Key('password'),
+      controller: _passwordController,
+      decoration: InputDecoration(
+        labelText: state.maybeMap(
+            register: (value) => 'Password (8+ characters)'.i18n,
+            orElse: () => 'Password'.i18n),
+        errorText: showErrorText
+            ? (state.password.isEmpty
+                ? 'Password can\'t be empty'.i18n
+                : 'Password is too short'.i18n)
+            : null,
+        enabled: !state.isLoading,
+      ),
+      obscureText: true,
+      autocorrect: false,
+      textInputAction: TextInputAction.done,
+      keyboardAppearance: Brightness.light,
+      onEditingComplete: () {
+        if (!state.canSubmitEmail) {
+          _node.previousFocus();
+          return;
+        }
+        _submit();
+      },
     );
   }
 }

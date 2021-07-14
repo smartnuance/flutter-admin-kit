@@ -99,7 +99,9 @@ class Auth extends StateNotifier<AsyncValue<User>> {
   Future<void> createUserWithEmailAndPassword(
       {required String email, required String password}) async {}
 
-  Future<void> sendPasswordResetEmail({required String email}) async {}
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    // TODO
+  }
 }
 
 class AuthInterceptor implements InterceptorContract {

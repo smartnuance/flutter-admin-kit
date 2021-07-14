@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:admin/common_widgets/error_actions.dart';
 import 'package:admin/constants.dart';
 import 'package:admin/dialogs/show_alert_dialog.dart';
-import 'package:admin/dialogs/show_exception_alert_dialog.dart';
 import 'package:admin/views/auth/auth.dart';
 import 'package:admin/views/auth/auth_provider.dart';
 import 'package:admin/views/auth/permission_gate.dart';
@@ -31,14 +30,6 @@ class AccountView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(userProvider.notifier);
     final user = ref.watch(userProvider);
-
-    auth.stream.handleError((dynamic error) {
-      showExceptionAlertDialog(
-        context: context,
-        title: 'Signing out failed'.i18n,
-        exception: error,
-      );
-    });
 
     return PermissionGate(
       signedInBuilder: (context) => SingleChildScrollView(

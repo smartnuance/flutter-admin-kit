@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:admin/utils/colors.dart';
 import 'package:admin/views/auth/account_view.dart';
-import 'package:admin/views/auth/auth_provider.dart';
 import 'package:admin/views/auth/sign_in/sign_in_view.dart';
 import 'package:admin/views/crud/model_create_view.dart';
 import 'package:admin/views/crud/model_list_view.dart';
@@ -87,25 +86,18 @@ class AdminApp extends ConsumerWidget {
 }
 
 MaterialPage _mapViewToPage(BuildContext context, View view, WidgetRef ref) {
-  final auth = ref.watch(userProvider.notifier);
-
   return view.id.when(
     custom: (id) {
       if (view.id == dashboardView.id) {
         return _buildPage(view, const DashboardView());
       } else if (view.id == loginView.id) {
-        return _buildPage(
-            view,
-            SignInView.withAuth(
-              auth,
-              onSignedIn: () {
-                if (!ref.read(viewStackProvider.notifier).pop()) {
-                  ref
-                      .read(viewStackProvider.notifier)
-                      .switchView(ViewId.dashboard);
-                }
-              },
-            ));
+        return _buildPage(view, SignInView(
+          onSignedIn: () {
+            if (!ref.read(viewStackProvider.notifier).pop()) {
+              ref.read(viewStackProvider.notifier).switchView(ViewId.dashboard);
+            }
+          },
+        ));
       } else if (view.id == messageView.id) {
         return _buildPage(view, const MessagesView());
       } else if (view.id == accountView.id) {

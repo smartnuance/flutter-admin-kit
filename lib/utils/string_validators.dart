@@ -46,14 +46,6 @@ class ValidatorInputFormatter implements TextInputFormatter {
   }
 }
 
-class EmailEditingRegexValidator extends RegexValidator {
-  EmailEditingRegexValidator() : super(regexSource: '^(|\\S)+\$');
-}
-
-class EmailSubmitRegexValidator extends RegexValidator {
-  EmailSubmitRegexValidator() : super(regexSource: '^\\S+@\\S+\\.\\S+\$');
-}
-
 class NonEmptyStringValidator extends StringValidator {
   @override
   bool isValid(String value) {
