@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 
@@ -9,6 +10,11 @@ import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_interceptor/http/http.dart';
 import 'package:http_interceptor/http_interceptor.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+final loadedUser = FutureProvider<User>((ref) async {
+  return await loadUser() ?? User.anonymous();
+});
 
 /// Provides sign in and sign out functionality.
 ///
@@ -16,12 +22,18 @@ import 'package:http_interceptor/http_interceptor.dart';
 /// between valid user, loading and error states.
 final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
   (ref) {
-    return Auth(ref);
+    final user = ref.watch(loadedUser).when(
+          data: (user) => AsyncValue<User>.data(user),
+          loading: () => const AsyncValue<User>.loading(),
+          error: (error, stackTrace) =>
+              AsyncValue<User>.error(error, stackTrace),
+        );
+    return Auth(ref, user);
   },
 );
 
 class Auth extends StateNotifier<AsyncValue<User>> {
-  Auth(this.ref) : super(AsyncValue.data(User.anonymous()));
+  Auth(this.ref, AsyncValue<User> user) : super(user);
 
   late final ProviderRefBase ref;
 
@@ -35,8 +47,11 @@ class Auth extends StateNotifier<AsyncValue<User>> {
           return User(username: username, tokens: tokens);
         });
         updated.when(
-          data: (user) => ref.read(messagesProvider.notifier).publish(
-              Message(text: 'Successfully logged in as ${user.username}')),
+          data: (user) {
+            storeUser(user);
+            ref.read(messagesProvider.notifier).publish(
+                Message(text: 'Successfully logged in as ${user.username}'));
+          },
           loading: () => {},
           error: (error, stackTrace) {
             ref.read(messagesProvider.notifier).publish(Message(
@@ -88,12 +103,10 @@ class Auth extends StateNotifier<AsyncValue<User>> {
     );
   }
 
-  Future<void> signInAnonymously() async {
-    state = AsyncValue.data(User.anonymous());
-  }
-
   Future<void> signOut() async {
-    state = AsyncValue.data(User.anonymous());
+    final user = User.anonymous();
+    state = AsyncValue.data(user);
+    await storeUser(user);
   }
 
   Future<void> createUserWithEmailAndPassword(
@@ -149,4 +162,22 @@ class ExpiredTokenRetryPolicy extends RetryPolicy {
     }
     return false;
   }
+}
+
+Future<User?> loadUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  final userEnc = prefs.getString('user');
+  if (userEnc == null) {
+    return null;
+  }
+  final user = User.fromMap(json.decode(userEnc) as Map<String, dynamic>);
+  developer.log('load user: ${user.username}');
+  return user;
+}
+
+Future<void> storeUser(User user) async {
+  final prefs = await SharedPreferences.getInstance();
+  final encoded = json.encode(user.toMap());
+  await prefs.setString('user', encoded);
+  developer.log('store user to $user');
 }
