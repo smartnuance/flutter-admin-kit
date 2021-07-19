@@ -9,11 +9,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-class ModelObjectList extends ConsumerWidget {
+class ModelObjectList extends ConsumerStatefulWidget {
   const ModelObjectList({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _ModelObjectListState createState() => _ModelObjectListState();
+}
+
+class _ModelObjectListState extends ConsumerState<ModelObjectList> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final modelInfo = ref.watch(modelInfoProvider('events/event'));
 
     return modelInfo.when(
@@ -22,23 +35,30 @@ class ModelObjectList extends ConsumerWidget {
         return modelList.when(
           data: (instances) {
             return instances.isNotEmpty
-                ? SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columns: modelInfo.fieldInfos.values
-                          .map(
-                            (info) => DataColumn(
-                              numeric: [IntegerInfo, FloatInfo]
-                                  .contains(info.runtimeType),
-                              label: Text(
-                                info.label,
+                ? Scrollbar(
+                    controller: _scrollController,
+                    interactive: true,
+                    isAlwaysShown: true,
+                    showTrackOnHover: true,
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columns: modelInfo.fieldInfos.values
+                            .map(
+                              (info) => DataColumn(
+                                numeric: [IntegerInfo, FloatInfo]
+                                    .contains(info.runtimeType),
+                                label: Text(
+                                  info.label,
+                                ),
                               ),
-                            ),
-                          )
-                          .toList(growable: false),
-                      rows: instances
-                          .map<DataRow>((e) => _buildRow(context, e))
-                          .toList(growable: false),
+                            )
+                            .toList(growable: false),
+                        rows: instances
+                            .map<DataRow>((e) => _buildRow(context, e))
+                            .toList(growable: false),
+                      ),
                     ),
                   )
                 : const Center(
