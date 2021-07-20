@@ -12,6 +12,8 @@ class ModelInstance with _$ModelInstance {
 
   const ModelInstance._();
 
+  FieldValue? get id => fields[info.idField];
+
   factory ModelInstance.fromMap(ModelInfo info, Map<String, dynamic>? data) {
     if (data == null) {
       throw StateError('missing data for ModelInstance');

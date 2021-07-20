@@ -21,6 +21,7 @@ class ModelInfo with _$ModelInfo {
     String? namePlural,
     @Default('') String? description,
     required Map<String, FieldInfo> fieldInfos,
+    @Default('id') String? idField,
   }) = _ModelInfo;
 
   const ModelInfo._();
@@ -42,8 +43,9 @@ class ModelInfo with _$ModelInfo {
     return ModelInfo(
       name: name,
       namePlural: data['name_plural'] as String?,
-      description: data['description'] as String? ?? '',
+      description: data['description'] as String?,
       fieldInfos: fieldInfos,
+      idField: data['idField'] as String? ?? 'id',
     );
   }
 }

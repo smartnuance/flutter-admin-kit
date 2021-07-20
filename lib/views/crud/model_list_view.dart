@@ -27,6 +27,8 @@ class ModelListView extends ConsumerWidget {
               children: [
                 const NavigationBreadcrumb(),
                 IconButton(
+                  iconSize: 20,
+                  splashRadius: 30,
                   icon: const Icon(Icons.refresh),
                   onPressed: () =>
                       ref.refresh(modelListProvider('events/event')),
