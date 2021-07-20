@@ -10,6 +10,7 @@ import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_interceptor/http/http.dart';
 import 'package:http_interceptor/http_interceptor.dart';
+import 'package:i18n_extension/default.i18n.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final loadedUser = FutureProvider<User>((ref) async {
@@ -41,6 +42,16 @@ class Auth extends StateNotifier<AsyncValue<User>> {
       {required String username, required String password}) async {
     state = await state.when(
       data: (user) async {
+        if (!user.isAnonymous) {
+          final msg =
+              'Another user "${user.username}" is still logged in.'.i18n;
+          ref.read(messagesProvider.notifier).publish(Message(
+                text: msg,
+                detail: 'To log in another user, log out first!'.i18n,
+                error: msg,
+              ));
+          return state;
+        }
         final updated = await AsyncValue.guard<User>(() async {
           final tokens =
               await ref.read(authServiceProvider).signIn(username, password);
@@ -157,7 +168,8 @@ class ExpiredTokenRetryPolicy extends RetryPolicy {
         await auth.refreshToken();
         return true;
       } catch (e) {
-        developer.log(e.toString());
+        ref.read(messagesProvider.notifier).publish(Message(
+            text: 'Refreshing tokens failed after receiving 401.', error: e));
       }
     }
     return false;
