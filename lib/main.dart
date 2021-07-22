@@ -13,6 +13,7 @@ import 'package:admin/views/page_layout.dart';
 import 'package:admin/views/shared_scaffold.dart';
 import 'package:admin/views/ui_model.dart';
 import 'package:admin/views/ui_provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -58,8 +59,9 @@ class AdminApp extends ConsumerWidget {
       title: title,
       theme: ThemeData(
           primarySwatch: swatch,
-          scaffoldBackgroundColor: swatch.withOpacity(0.2),
           // CI secondary color
+          canvasColor: lighten(swatch.shade50, 0.2),
+          backgroundColor: Colors.white,
           accentColor: const Color(0xff6467f1),
           textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           errorColor: const Color(0xffc74949)),
@@ -289,6 +291,9 @@ class URLNavigator extends ConsumerWidget {
     }
 
     return SharedScaffold(
+      backgroundColor:
+          viewStack.length == 1 ? Theme.of(context).canvasColor : null,
+      elevation: viewStack.length * 4,
       child: Navigator(
         key: navigatorKey,
         // pages should never be empty: when viewStack is empty show a single loading view

@@ -15,9 +15,13 @@ class SharedScaffold extends ConsumerWidget {
   const SharedScaffold({
     Key? key,
     required this.child,
+    this.elevation = 8,
+    this.backgroundColor,
   }) : super(key: key);
 
   final Widget child;
+  final double elevation;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,7 +55,7 @@ class SharedScaffold extends ConsumerWidget {
     return I18n(
       child: Scaffold(
         key: drawerKey,
-        drawer: SideMenu(),
+        drawer: DeviceSize.isDesktop(context) ? null : SideMenu(),
         body: SafeArea(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +70,12 @@ class SharedScaffold extends ConsumerWidget {
               Expanded(
                 // It takes 5/6 part of the screen
                 flex: 5,
-                child: child,
+                child: Material(
+                  elevation: elevation,
+                  type: MaterialType.canvas,
+                  color: backgroundColor ?? Theme.of(context).backgroundColor,
+                  child: child,
+                ),
               ),
             ],
           ),

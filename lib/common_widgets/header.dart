@@ -36,8 +36,8 @@ class Header extends ConsumerWidget {
           horizontal: defaultPadding, vertical: defaultDensePadding),
       decoration: BoxDecoration(
         border: Border(
-          bottom:
-              BorderSide(width: 1.0, color: Theme.of(context).backgroundColor),
+          bottom: BorderSide(
+              width: 1.0, color: Theme.of(context).primaryColorLight),
         ),
       ),
       child: Row(
