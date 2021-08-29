@@ -2,6 +2,8 @@
 
 Build a generative, customized admin for all platforms. Nice to use and nice to extend.
 
+Learn more in the [introductory blog post & videos](http://localhost:9000/blog/flutter-admin-kit/) from the creator.
+
 **Feature highlights:**
 
 Declarative routing via global state:
