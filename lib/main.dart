@@ -203,10 +203,16 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
     with PopNavigatorRouterDelegateMixin<RoutedView> {
   ViewRouterDelegate(
     this.ref,
-  );
+  ) {
+    // ignore: avoid_types_on_closure_parameters
+    ref.listen(mainViewProvider, (StateController<RoutedView?> sc) {
+      mainView = sc.state;
+    });
+  }
 
   late final ProviderRefBase ref;
-  Function()? cancelSubscription;
+  Map<VoidCallback, VoidCallback> listenerToProviderSubscriptions = {};
+  RoutedView? mainView;
 
   @override
   Widget build(BuildContext context) {
@@ -248,11 +254,7 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
   }
 
   @override
-  RoutedView? get currentConfiguration {
-    developer.log('current route configuration');
-    final mainView = ref.read(mainViewProvider).state;
-    return mainView;
-  }
+  RoutedView? get currentConfiguration => mainView;
 
   @override
   Future<bool> popRoute() async {
@@ -262,12 +264,19 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
 
   @override
   void addListener(VoidCallback listener) {
-    cancelSubscription = ref.listen(mainViewProvider, (_) => listener());
+    if (!listenerToProviderSubscriptions.containsKey(listener)) {
+      listenerToProviderSubscriptions.putIfAbsent(
+          listener,
+          () => ref.listen(mainViewProvider, (_) {
+                listener();
+              }));
+    }
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    cancelSubscription?.call();
+    final cancel = listenerToProviderSubscriptions.remove(listener);
+    cancel?.call();
   }
 }
 
