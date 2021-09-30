@@ -32,6 +32,7 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       child: AdminApp(key: appKey),
+      observers: [Logger()],
     ),
   );
 }
@@ -308,5 +309,18 @@ class URLNavigator extends ConsumerWidget {
         },
       ),
     );
+  }
+}
+
+class Logger extends ProviderObserver {
+  @override
+  void didUpdateProvider(
+    ProviderBase provider,
+    Object? previousValue,
+    Object? newValue,
+    ProviderContainer container,
+  ) {
+    developer.log(
+        '''{  "provider": "${provider.name ?? provider.runtimeType}",  "newValue": "$newValue"}''');
   }
 }
