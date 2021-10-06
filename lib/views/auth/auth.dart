@@ -70,16 +70,27 @@ class TokenPair with _$TokenPair {
       throw StateError('missing data for TokenPair');
     }
 
+    final refreshToken = data['refreshToken'] as String?;
+    final accessToken = data['accessToken'] as String?;
+    if (refreshToken == null) {
+      throw Exception(
+          'Did not found refresh token in response to successful login call');
+    }
+    if (accessToken == null) {
+      throw Exception(
+          'Did not found access token in response to successful login call');
+    }
+
     return TokenPair(
-      refresh: data['refresh'] as String? ?? '',
-      access: data['access'] as String? ?? '',
+      refresh: data['refreshToken'] as String? ?? '',
+      access: data['accessToken'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'access': access,
-      'refresh': refresh,
+      'accessToken': access,
+      'refreshToken': refresh,
     };
   }
 }

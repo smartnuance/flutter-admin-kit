@@ -74,7 +74,8 @@ class DebugPanel extends ConsumerWidget {
                     flex: 0,
                     child: TextButton.icon(
                         onPressed: () => auth.signInWithCredential(
-                            username: 'simon', password: 'f00bartest'),
+                            username: 'simon@smartnuance.com',
+                            password: 'f00bartest'),
                         icon: const Icon(Icons.manage_accounts),
                         label: const Text('Login in test user')),
                   ),

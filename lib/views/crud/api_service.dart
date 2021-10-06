@@ -10,8 +10,7 @@ class APIService {
   APIService(this.tokenClient);
 
   final http.Client tokenClient;
-  final Uri baseURI = Uri.parse('http://localhost:8000/a/api/');
-  final Uri tokenURI = Uri.parse('http://localhost:8000/a/token/');
+  final Uri baseURI = Uri.parse('http://localhost:8800/');
 
   Map<String, String> _headers() {
     return {
@@ -21,7 +20,7 @@ class APIService {
   }
 
   Future<ModelInfo> retrieveModelInfo(String modelPath) async {
-    final url = baseURI.resolve(p.join(modelPath, 'info/'));
+    final url = baseURI.resolve(p.join(modelPath, 'info'));
     final response = await tokenClient.get(
       url,
       headers: _headers(),
