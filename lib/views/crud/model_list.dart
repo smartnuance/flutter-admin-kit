@@ -36,10 +36,10 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
       service: 'event',
       model: 'workshop',
     );
-    final modelInfo = ref.watch(modelInfoProvider(meta));
+    final spec_ = ref.watch(modelSpecProvider(meta));
 
-    return modelInfo.when(
-      data: (modelInfo) {
+    return spec_.when(
+      data: (spec) {
         final modelList = ref.watch(modelListProvider(meta));
         return modelList.when(
           data: (instances) {
@@ -86,7 +86,7 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
                         },
                         child: DataTable(
                           showCheckboxColumn: multiSelectMode,
-                          columns: modelInfo.fieldInfos.values
+                          columns: spec.infos[meta]!.fieldInfos.values
                               .map(
                                 (info) => DataColumn(
                                   numeric: [IntegerInfo, FloatInfo]
@@ -131,7 +131,7 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
       error: (error, stackTrace) {
         return ErrorActions(
           error,
-          onRetry: () => ref.refresh(modelInfoProvider(meta)),
+          onRetry: () => ref.refresh(modelSpecProvider(meta)),
         );
       },
     );
@@ -141,10 +141,9 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
     final dynamic idHashCode = instance.id?.value.hashCode;
 
     return DataRow(
-      cells: instance.fields.entries
-          .map<DataCell>(
-            (entry) => _buildCell(context, entry.key, entry.value),
-          )
+      cells: instance.info.fieldInfos.entries
+          .map<DataCell>((entry) =>
+              _buildCell(context, entry.key, instance.fields[entry.key]))
           .toList(growable: false),
       selected: selected.contains(idHashCode),
       onSelectChanged: multiSelectMode
@@ -171,7 +170,12 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
     );
   }
 
-  DataCell _buildCell(BuildContext context, String id, FieldValue fieldValue) {
+  DataCell _buildCell(BuildContext context, String id, FieldValue? fieldValue) {
+    if (fieldValue == null) {
+      return const DataCell(
+        Text(''),
+      );
+    }
     return fieldValue.info.map(
       string: (_) {
         final value = (fieldValue as StringValue).value;
@@ -246,10 +250,16 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
           Text(value ?? ''),
         );
       },
-      relationalField: (_) {
-        final value = (fieldValue as RelationalFieldValue).value;
+      relationalID: (_) {
+        final value = (fieldValue as RelationalIDValue).value;
         return DataCell(
           Text(value?.toString() ?? ''),
+        );
+      },
+      relationalContent: (_) {
+        final value = (fieldValue as RelationalContentValue).value;
+        return DataCell(
+          Text(value?.info.meta.toString() ?? ''),
         );
       },
     );

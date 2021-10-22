@@ -7,15 +7,15 @@ import 'package:admin/views/messages/message_model.dart';
 import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final modelInfoProvider =
-    FutureProvider.autoDispose.family<ModelInfo, ModelMeta>((ref, meta) async {
+final modelSpecProvider =
+    FutureProvider.autoDispose.family<ModelSpec, ModelMeta>((ref, meta) async {
   final apiService = ref.watch(apiServiceProvider);
-  final ModelInfo modelInfo;
+  final ModelSpec modelInfo;
   try {
-    modelInfo = await apiService.retrieveModelInfo(meta);
+    modelInfo = await apiService.retrieveModelSpec(meta);
   } catch (error, stackTrace) {
     developer.log(
-      'retrieveModelInfo',
+      'retrieveModelSpec',
       error: error,
       stackTrace: stackTrace,
     );
@@ -32,7 +32,7 @@ final modelInfoProvider =
 final modelListProvider = StreamProvider.autoDispose
     .family<List<ModelInstance>, ModelMeta>((ref, meta) async* {
   final apiService = ref.watch(apiServiceProvider);
-  final modelInfo = await ref.watch(modelInfoProvider(meta).future);
+  final modelInfo = await ref.watch(modelSpecProvider(meta).future);
   try {
     final list = List<ModelInstance>.from(
         await apiService.retrieveList(modelInfo, meta));

@@ -11,11 +11,59 @@ class ModelMeta with _$ModelMeta {
   }) = _ModelMeta;
 
   const ModelMeta._();
+
+  factory ModelMeta.fromMap(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw StateError('missing data for ModelMeta');
+    }
+    final service = data['service'] as String?;
+    if (service == null) {
+      throw StateError('missing service for ModelMeta');
+    }
+    final model = data['model'] as String?;
+    if (model == null) {
+      throw StateError('missing model for ModelMeta');
+    }
+    return ModelMeta(
+      service: service,
+      model: model,
+    );
+  }
+}
+
+@freezed
+class ModelSpec with _$ModelSpec {
+  factory ModelSpec({
+    required Map<ModelMeta, ModelInfo> infos,
+  }) = _ModelSpec;
+
+  const ModelSpec._();
+
+  factory ModelSpec.fromMap(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw StateError('missing data for ModelSpec');
+    }
+    final infos = data['infos'] as List<dynamic>?;
+    if (infos == null) {
+      throw StateError('missing infos for ModelSpec');
+    }
+    final infosList = infos
+        .map<ModelInfo>((dynamic modelData) =>
+            ModelInfo.fromMap(modelData as Map<String, dynamic>?))
+        .toList(growable: false);
+    return ModelSpec(
+      infos: Map<ModelMeta, ModelInfo>.fromIterable(
+        infosList,
+        key: (dynamic info) => (info as ModelInfo).meta,
+      ),
+    );
+  }
 }
 
 @freezed
 class ModelInfo with _$ModelInfo {
   factory ModelInfo({
+    required ModelMeta meta,
     required String name,
     String? namePlural,
     @Default('') String? description,
@@ -40,6 +88,7 @@ class ModelInfo with _$ModelInfo {
     final fieldInfos = fields.map((fieldName, dynamic m) =>
         MapEntry(fieldName, FieldInfo.fromMap(m as Map<String, dynamic>?)));
     return ModelInfo(
+      meta: ModelMeta.fromMap(data),
       name: name,
       namePlural: data['name_plural'] as String?,
       description: data['description'] as String?,
@@ -58,7 +107,8 @@ enum FieldType {
   datetime,
   duration,
   choice,
-  field,
+  relationalID,
+  relationalContent,
 }
 
 @freezed
@@ -113,12 +163,20 @@ class FieldInfo with _$FieldInfo {
     required bool required,
     required bool readOnly,
   }) = ChoiceInfo;
-  factory FieldInfo.relationalField({
+  factory FieldInfo.relationalID({
     required String label,
     String? helpText,
     required bool required,
     required bool readOnly,
-  }) = RelationalFieldInfo;
+    required ModelMeta meta,
+  }) = RelationalID;
+  factory FieldInfo.relationalContent({
+    required String label,
+    String? helpText,
+    required bool required,
+    required bool readOnly,
+    required ModelMeta meta,
+  }) = RelationalContent;
 
   const FieldInfo._();
 
@@ -197,12 +255,37 @@ class FieldInfo with _$FieldInfo {
           required: data['required'] as bool? ?? false,
           readOnly: data['read_only'] as bool? ?? false,
         );
-      case FieldType.field:
-        return FieldInfo.relationalField(
+      case FieldType.relationalID:
+        final service = data['service'] as String?;
+        if (service == null) {
+          throw StateError('missing service for FieldInfo with type==$typeStr');
+        }
+        final model = data['model'] as String?;
+        if (model == null) {
+          throw StateError('missing model for FieldInfo with type==$typeStr');
+        }
+        return FieldInfo.relationalID(
           label: label,
           helpText: data['help_text'] as String?,
           required: data['required'] as bool? ?? false,
           readOnly: data['read_only'] as bool? ?? false,
+          meta: ModelMeta.fromMap(data),
+        );
+      case FieldType.relationalContent:
+        final service = data['service'] as String?;
+        if (service == null) {
+          throw StateError('missing service for FieldInfo with type==$typeStr');
+        }
+        final model = data['model'] as String?;
+        if (model == null) {
+          throw StateError('missing model for FieldInfo with type==$typeStr');
+        }
+        return FieldInfo.relationalContent(
+          label: label,
+          helpText: data['help_text'] as String?,
+          required: data['required'] as bool? ?? false,
+          readOnly: data['read_only'] as bool? ?? false,
+          meta: ModelMeta.fromMap(data),
         );
     }
   }

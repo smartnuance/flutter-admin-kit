@@ -8,27 +8,39 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Parse', () {
     test('parse ModelInfo', () async {
-      final file = File('test/crud/modelInfo.json');
+      final file = File('test/crud/modelSpecs.json');
       final jsonStr = await file.readAsString();
-      final modelInfo = ModelInfo.fromMap(json.decode(jsonStr));
-      expect(modelInfo.name, 'Event');
-      expect(modelInfo.namePlural, 'Events');
+      final spec = ModelSpec.fromMap(json.decode(jsonStr));
+      print(spec.infos.keys);
+      expect(spec.infos[ModelMeta(service: 'event', model: 'workshop')]?.name,
+          'Workshop');
+      expect(
+          spec.infos[ModelMeta(service: 'event', model: 'workshop')]
+              ?.namePlural,
+          'Workshops');
+      expect(spec.infos[ModelMeta(service: 'event', model: 'event')]?.name,
+          'Event');
+      expect(
+          spec.infos[ModelMeta(service: 'event', model: 'event')]?.namePlural,
+          'Events');
     });
 
     test('parse ModelInstance', () async {
-      final ModelInfo modelInfo;
+      final ModelSpec spec;
       {
-        final file = File('test/crud/modelInfo.json');
+        final file = File('test/crud/modelSpecs.json');
         final jsonStr = await file.readAsString();
-        modelInfo = ModelInfo.fromMap(json.decode(jsonStr));
+        spec = ModelSpec.fromMap(json.decode(jsonStr));
       }
 
       {
         final file = File('test/crud/modelInstance.json');
         final jsonStr = await file.readAsString();
-        final modelInstance =
-            ModelInstance.fromMap(modelInfo, json.decode(jsonStr));
-        expect(modelInstance.fields['name']?.value, 'Bachata');
+        final modelInstance = ModelInstance.fromMap(
+            spec,
+            ModelMeta(service: 'event', model: 'workshop'),
+            json.decode(jsonStr));
+        expect(modelInstance.fields['title']?.value, 'Salsa');
       }
     });
   });

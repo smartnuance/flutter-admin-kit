@@ -14,18 +14,24 @@ class ModelInstance with _$ModelInstance {
 
   FieldValue? get id => fields[info.idField];
 
-  factory ModelInstance.fromMap(ModelInfo info, Map<String, dynamic>? data) {
+  factory ModelInstance.fromMap(
+      ModelSpec spec, ModelMeta meta, Map<String, dynamic>? data) {
     if (data == null) {
       throw StateError('missing data for ModelInstance');
     }
+    final info = spec.infos[meta];
+    if (info == null) {
+      throw StateError('missing model info in spec for ModelInstance');
+    }
+
     final fields = <String, FieldValue>{};
     data.forEach((fieldName, dynamic m) {
       final fieldInfos = info.fieldInfos[fieldName];
       if (fieldInfos == null) {
         throw StateError(
-            'encountered unknown field in ModelInstance not described in infos');
+            'encountered unknown field $fieldName in ModelInstance not described in infos');
       }
-      fields[fieldName] = FieldValue.fromMap(fieldInfos, m);
+      fields[fieldName] = FieldValue.fromMap(spec, fieldInfos, m);
     });
     return ModelInstance(
       info: info,
@@ -42,7 +48,7 @@ abstract class FieldValue {
 
   dynamic get value;
 
-  factory FieldValue.fromMap(FieldInfo info, dynamic data) {
+  factory FieldValue.fromMap(ModelSpec spec, FieldInfo info, dynamic data) {
     if (data == null) {
       if (info.required) {
         throw StateError('missing data of required field "${info.label}"');
@@ -57,8 +63,10 @@ abstract class FieldValue {
       datetime: (info) => DatetimeValue.fromString(info, data as String?),
       duration: (info) => DurationValue.fromString(info, data as String?),
       choice: (info) => ChoiceValue(info: info, value: data as String?),
-      relationalField: (info) =>
-          RelationalFieldValue(info: info, value: data as int?),
+      relationalID: (info) =>
+          RelationalIDValue(info: info, value: data as String?),
+      relationalContent: (info) => RelationalContentValue(
+          info: info, value: ModelInstance.fromMap(spec, info.meta, data)),
     );
   }
 }
@@ -150,9 +158,18 @@ class ChoiceValue extends FieldValue with _$ChoiceValue {
 }
 
 @freezed
-class RelationalFieldValue extends FieldValue with _$RelationalFieldValue {
-  factory RelationalFieldValue(
-      {required RelationalFieldInfo info, int? value}) = _RelationalFieldValue;
+class RelationalIDValue extends FieldValue with _$RelationalIDValue {
+  factory RelationalIDValue({required RelationalID info, String? value}) =
+      _RelationalIDValue;
 
-  const RelationalFieldValue._();
+  const RelationalIDValue._();
+}
+
+@freezed
+class RelationalContentValue extends FieldValue with _$RelationalContentValue {
+  factory RelationalContentValue(
+      {required RelationalContent info,
+      ModelInstance? value}) = _RelationalContentValue;
+
+  const RelationalContentValue._();
 }
