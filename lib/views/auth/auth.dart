@@ -56,13 +56,14 @@ class TokenPair with _$TokenPair {
   factory TokenPair({
     required String refresh,
     required String access,
+    @Default('') String role,
   }) = _TokenPair;
 
   const TokenPair._();
 
   @override
   String toString() {
-    return '(Access: ...${tail(access, 5)}, Refresh: ...${tail(refresh, 5)})';
+    return '$role with (Access: ...${tail(access, 5)}, Refresh: ...${tail(refresh, 5)})';
   }
 
   factory TokenPair.fromMap(Map<String, dynamic>? data) {
@@ -71,19 +72,20 @@ class TokenPair with _$TokenPair {
     }
 
     final refreshToken = data['refreshToken'] as String?;
-    final accessToken = data['accessToken'] as String?;
     if (refreshToken == null) {
       throw Exception(
           'Did not found refresh token in response to successful login call');
     }
+    final accessToken = data['accessToken'] as String?;
     if (accessToken == null) {
       throw Exception(
           'Did not found access token in response to successful login call');
     }
 
     return TokenPair(
-      refresh: data['refreshToken'] as String? ?? '',
-      access: data['accessToken'] as String? ?? '',
+      refresh: refreshToken,
+      access: accessToken,
+      role: data['role'] as String? ?? '', // corresponds to no role
     );
   }
 
@@ -91,6 +93,7 @@ class TokenPair with _$TokenPair {
     return {
       'accessToken': access,
       'refreshToken': refresh,
+      'role': role,
     };
   }
 }

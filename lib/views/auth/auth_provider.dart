@@ -13,6 +13,8 @@ import 'package:http_interceptor/http_interceptor.dart';
 import 'package:i18n_extension/default.i18n.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const roleHeader = 'Role';
+
 final loadedUser = FutureProvider<User>((ref) async {
   return await loadUser() ?? User.anonymous();
 });
@@ -146,6 +148,8 @@ class AuthInterceptor implements InterceptorContract {
     }
     developer.log('intercepted and added token ${tokens.toString()}');
     data.headers[HttpHeaders.authorizationHeader] = 'Bearer ${tokens?.access}';
+    // Set the header even if role == '', which denotes no role at all
+    data.headers[roleHeader] = tokens?.role ?? '';
     return data;
   }
 
