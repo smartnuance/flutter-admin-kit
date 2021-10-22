@@ -11,21 +11,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:i18n_extension/default.i18n.dart';
 
-class AccountView extends ConsumerWidget {
-  Future<void> _confirmSignOut(BuildContext context, Auth auth) async {
-    final bool confirmed = await showAlertDialog(
-          context: context,
-          title: 'Sign out'.i18n,
-          content: 'Are you sure that you want to sign out?'.i18n,
-          cancelActionText: 'Cancel'.i18n,
-          defaultActionText: 'Sign out'.i18n,
-        ) ??
-        false;
-    if (confirmed) {
-      await auth.signOut();
-    }
-  }
+final roles = <String, String>{
+  'super admin': 'Super Admin'.i18n,
+  'admin': 'Admin'.i18n,
+  'event organizer': 'Event Organizer'.i18n,
+};
 
+class AccountView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(userProvider.notifier);
@@ -43,13 +35,27 @@ class AccountView extends ConsumerWidget {
                             'You cannot access the account page.')
                       ]
                     : [
-                        _buildButtons(context, auth),
                         _buildUserInfo(user),
+                        RoleSwitch(),
+                        _buildButtons(context, auth),
                       ],
                 orElse: () => [Container()])
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildUserInfo(User user) {
+    return Column(
+      children: [
+        if (user.displayName != null)
+          Text(
+            user.displayName!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        const SizedBox(height: 8),
+      ],
     );
   }
 
@@ -68,16 +74,46 @@ class AccountView extends ConsumerWidget {
     );
   }
 
-  Widget _buildUserInfo(User user) {
-    return Column(
-      children: [
-        if (user.displayName != null)
-          Text(
-            user.displayName!,
-            style: const TextStyle(color: Colors.white),
-          ),
-        const SizedBox(height: 8),
-      ],
+  Future<void> _confirmSignOut(BuildContext context, Auth auth) async {
+    final bool confirmed = await showAlertDialog(
+          context: context,
+          title: 'Sign out'.i18n,
+          content: 'Are you sure that you want to sign out?'.i18n,
+          cancelActionText: 'Cancel'.i18n,
+          defaultActionText: 'Sign out'.i18n,
+        ) ??
+        false;
+    if (confirmed) {
+      await auth.signOut();
+    }
+  }
+}
+
+class RoleSwitch extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(roleProvider).state;
+
+    final items = roles.entries.map<DropdownMenuItem<String>>((entry) {
+      return DropdownMenuItem<String>(
+        value: entry.key,
+        child: Text(entry.value),
+      );
+    }).toList();
+    return DropdownButton<String>(
+      value: role,
+      icon: const Icon(Icons.arrow_downward),
+      iconSize: 24,
+      elevation: 16,
+      style: const TextStyle(color: Colors.deepPurple),
+      underline: Container(
+        height: 2,
+        color: Colors.deepPurpleAccent,
+      ),
+      onChanged: (newRole) {
+        ref.read(roleProvider).state = newRole ?? noRole;
+      },
+      items: items,
     );
   }
 }

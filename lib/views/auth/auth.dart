@@ -3,6 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'auth.freezed.dart';
 
+const noRole = '';
+
 @freezed
 class User with _$User {
   factory User({
@@ -56,7 +58,7 @@ class TokenPair with _$TokenPair {
   factory TokenPair({
     required String refresh,
     required String access,
-    @Default('') String role,
+    @Default(noRole) String role,
   }) = _TokenPair;
 
   const TokenPair._();
@@ -85,7 +87,7 @@ class TokenPair with _$TokenPair {
     return TokenPair(
       refresh: refreshToken,
       access: accessToken,
-      role: data['role'] as String? ?? '', // corresponds to no role
+      role: data['role'] as String? ?? noRole,
     );
   }
 

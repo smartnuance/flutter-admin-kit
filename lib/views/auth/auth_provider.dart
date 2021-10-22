@@ -35,6 +35,17 @@ final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
   },
 );
 
+/// Provides the current temporary role. Might deviate from the default role returned with tokens.
+final roleProvider = StateProvider<String>(
+  (ref) {
+    return ref.watch(userProvider).when(
+          data: (user) => user.tokens?.role ?? noRole,
+          loading: () => noRole,
+          error: (error, stackTrace) => noRole,
+        );
+  },
+);
+
 class Auth extends StateNotifier<AsyncValue<User>> {
   Auth(this.ref, AsyncValue<User> user) : super(user);
 
@@ -138,6 +149,7 @@ class AuthInterceptor implements InterceptorContract {
   @override
   Future<RequestData> interceptRequest({required RequestData data}) async {
     final tokens = ref.read(userProvider).data?.value.tokens;
+    final role = ref.read(roleProvider).state;
     if (tokens?.access == null) {
       final error = StateError(
           'Attempt to access the access token to intercept and authenticate a request but no access token is available.');
@@ -149,7 +161,7 @@ class AuthInterceptor implements InterceptorContract {
     developer.log('intercepted and added token ${tokens.toString()}');
     data.headers[HttpHeaders.authorizationHeader] = 'Bearer ${tokens?.access}';
     // Set the header even if role == '', which denotes no role at all
-    data.headers[roleHeader] = tokens?.role ?? '';
+    data.headers[roleHeader] = role;
     return data;
   }
 
