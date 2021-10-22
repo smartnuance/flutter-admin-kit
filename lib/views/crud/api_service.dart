@@ -19,8 +19,8 @@ class APIService {
     };
   }
 
-  Future<ModelInfo> retrieveModelInfo(String modelPath) async {
-    final url = baseURI.resolve(p.join(modelPath, 'info'));
+  Future<ModelInfo> retrieveModelInfo(ModelMeta meta) async {
+    final url = baseURI.resolve(p.join(meta.service, 'info', meta.model));
     final response = await tokenClient.get(
       url,
       headers: _headers(),
@@ -40,8 +40,8 @@ class APIService {
   }
 
   Future<Iterable<ModelInstance>> retrieveList(
-      ModelInfo info, String modelPath) async {
-    final url = baseURI.resolve(modelPath);
+      ModelInfo info, ModelMeta meta) async {
+    final url = baseURI.resolve(p.join(meta.service, meta.model, 'list'));
     final response = await tokenClient.get(
       url,
       headers: _headers(),

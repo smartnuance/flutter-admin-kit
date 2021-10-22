@@ -32,11 +32,15 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
 
   @override
   Widget build(BuildContext context) {
-    final modelInfo = ref.watch(modelInfoProvider('events/event'));
+    final meta = ModelMeta(
+      service: 'event',
+      model: 'workshop',
+    );
+    final modelInfo = ref.watch(modelInfoProvider(meta));
 
     return modelInfo.when(
       data: (modelInfo) {
-        final modelList = ref.watch(modelListProvider('events/event'));
+        final modelList = ref.watch(modelListProvider(meta));
         return modelList.when(
           data: (instances) {
             if (instances.isNotEmpty) {
@@ -118,7 +122,7 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
           error: (error, stackTrace) {
             return ErrorActions(
               error,
-              onRetry: () => ref.refresh(modelListProvider('events/event')),
+              onRetry: () => ref.refresh(modelListProvider(meta)),
             );
           },
         );
@@ -127,7 +131,7 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
       error: (error, stackTrace) {
         return ErrorActions(
           error,
-          onRetry: () => ref.refresh(modelInfoProvider('events/event')),
+          onRetry: () => ref.refresh(modelInfoProvider(meta)),
         );
       },
     );

@@ -6,9 +6,8 @@ part 'model_infos.freezed.dart';
 @freezed
 class ModelMeta with _$ModelMeta {
   factory ModelMeta({
-    required String id,
-    required String listAPI,
-    required ModelInfo modelInfo,
+    required String service,
+    required String model,
   }) = _ModelMeta;
 
   const ModelMeta._();
