@@ -31,21 +31,10 @@ class DebugPanel extends ConsumerWidget {
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: const Alignment(-0.98, -0.98),
-            stops: const [0, 0.1, 0.1, 1],
-            colors: [
-              Colors.black12,
-              Colors.black12,
-              Colors.black12.withOpacity(0.05),
-              Colors.black12.withOpacity(0.05),
-            ],
-            tileMode: TileMode.repeated,
-          ),
+          color: Colors.black12,
         ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(defaultPadding),
