@@ -15,6 +15,7 @@ final roles = <String, String>{
   'super admin': 'Super Admin'.i18n,
   'admin': 'Admin'.i18n,
   'event organizer': 'Event Organizer'.i18n,
+  noRole: 'Anonymous'.i18n,
 };
 
 class AccountView extends ConsumerWidget {
@@ -36,7 +37,9 @@ class AccountView extends ConsumerWidget {
                       ]
                     : [
                         _buildUserInfo(user),
+                        const SizedBox(height: defaultPadding),
                         RoleSwitch(),
+                        const SizedBox(height: defaultPadding),
                         _buildButtons(context, auth),
                       ],
                 orElse: () => [Container()])
@@ -61,8 +64,9 @@ class AccountView extends ConsumerWidget {
 
   Widget _buildButtons(BuildContext context, Auth auth) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        const Spacer(),
         Flexible(
           child: SignOutButton(
             key: const Key('logout-button'),
@@ -92,7 +96,7 @@ class AccountView extends ConsumerWidget {
 class RoleSwitch extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(roleProvider).state;
+    final role = ref.watch(currentRoleProvider);
 
     final items = roles.entries.map<DropdownMenuItem<String>>((entry) {
       return DropdownMenuItem<String>(
@@ -100,18 +104,17 @@ class RoleSwitch extends ConsumerWidget {
         child: Text(entry.value),
       );
     }).toList();
-    return DropdownButton<String>(
+    return DropdownButtonFormField<String>(
       value: role,
-      icon: const Icon(Icons.arrow_downward),
+      icon: const Icon(Icons.arrow_drop_down),
+      decoration: const InputDecoration(
+        label: Text('Current role'),
+        border: OutlineInputBorder(),
+      ),
       iconSize: 24,
       elevation: 16,
-      style: const TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 2,
-        color: Colors.deepPurpleAccent,
-      ),
       onChanged: (newRole) {
-        ref.read(roleProvider).state = newRole ?? noRole;
+        ref.read(userProvider.notifier).switchRole(newRole);
       },
       items: items,
     );

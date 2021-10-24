@@ -36,13 +36,10 @@ final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
 );
 
 /// Provides the current temporary role. Might deviate from the default role returned with tokens.
-final roleProvider = StateProvider<String>(
+final currentRoleProvider = Provider<String>(
   (ref) {
-    return ref.watch(userProvider).when(
-          data: (user) => user.tokens?.role ?? noRole,
-          loading: () => noRole,
-          error: (error, stackTrace) => noRole,
-        );
+    return ref.watch(
+        userProvider.select((user) => user.data?.value.currentRole ?? noRole));
   },
 );
 
@@ -68,7 +65,8 @@ class Auth extends StateNotifier<AsyncValue<User>> {
         final updated = await AsyncValue.guard<User>(() async {
           final tokens =
               await ref.read(authServiceProvider).signIn(username, password);
-          return User(username: username, tokens: tokens);
+          return User(
+              username: username, tokens: tokens, currentRole: tokens.role);
         });
         updated.when(
           data: (user) {
@@ -127,10 +125,21 @@ class Auth extends StateNotifier<AsyncValue<User>> {
     );
   }
 
+  Future<void> switchRole(String? role) async {
+    state.maybeWhen(
+      data: (user) async {
+        final updatedUser = user.copyWith(currentRole: role ?? noRole);
+        state = AsyncValue.data(updatedUser);
+        await storeUser(updatedUser);
+      },
+      orElse: () => {},
+    );
+  }
+
   Future<void> signOut() async {
     final user = User.anonymous();
     state = AsyncValue.data(user);
-    await storeUser(user);
+    await clearStoredUser();
   }
 
   Future<void> createUserWithEmailAndPassword(
@@ -149,7 +158,7 @@ class AuthInterceptor implements InterceptorContract {
   @override
   Future<RequestData> interceptRequest({required RequestData data}) async {
     final tokens = ref.read(userProvider).data?.value.tokens;
-    final role = ref.read(roleProvider).state;
+    final role = ref.read(currentRoleProvider);
     if (tokens?.access == null) {
       final error = StateError(
           'Attempt to access the access token to intercept and authenticate a request but no access token is available.');
@@ -199,7 +208,7 @@ Future<User?> loadUser() async {
     return null;
   }
   final user = User.fromMap(json.decode(userEnc) as Map<String, dynamic>);
-  developer.log('load user: ${user.username}');
+  developer.log('load user: ${user.username} as ${user.currentRole}');
   return user;
 }
 
@@ -207,5 +216,10 @@ Future<void> storeUser(User user) async {
   final prefs = await SharedPreferences.getInstance();
   final encoded = json.encode(user.toMap());
   await prefs.setString('user', encoded);
-  developer.log('store user to $user');
+  developer.log('store user to ${user.username} as ${user.currentRole}');
+}
+
+Future<void> clearStoredUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('user');
 }

@@ -11,12 +11,14 @@ class User with _$User {
     required String username,
     String? displayName,
     TokenPair? tokens,
+    @Default(noRole) String currentRole,
   }) = _User;
 
   factory User.anonymous({
     @Default('') String username,
     @Default('') String? displayName,
     @Default(null) TokenPair? tokens,
+    @Default(noRole) String currentRole,
   }) = _AnonymousUser;
 
   User._();
@@ -41,6 +43,7 @@ class User with _$User {
       username: username!,
       displayName: data['displayName'] as String?,
       tokens: tokenPair,
+      currentRole: data['currentRole'] as String? ?? noRole,
     );
   }
 
@@ -49,6 +52,7 @@ class User with _$User {
       'username': username,
       'displayName': displayName,
       'tokens': tokens?.toMap(),
+      'currentRole': currentRole,
     };
   }
 }

@@ -1,4 +1,5 @@
 import 'package:admin/constants.dart';
+import 'package:admin/views/auth/account_view.dart';
 import 'package:admin/views/auth/auth_provider.dart';
 import 'package:admin/views/messages/message_model.dart';
 import 'package:admin/views/messages/message_provider.dart';
@@ -45,6 +46,7 @@ class DebugPanel extends ConsumerWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: defaultPadding),
             Flexible(
               flex: 0,
               child: Row(
@@ -54,9 +56,14 @@ class DebugPanel extends ConsumerWidget {
                       data: (user) => _buildCopyableText('User:',
                           '${user.username.isNotEmpty ? user.username : '<anonymous user>'} (${user.displayName ?? '<no display name>'})'),
                       loading: () => const LinearProgressIndicator(),
-                      error: (error, stackTrace) => _buildCopyableText(
-                          'Refresh token:', error.toString()),
+                      error: (error, stackTrace) =>
+                          _buildCopyableText('Error:', error.toString()),
                     ),
+                  ),
+                  const SizedBox(width: defaultPadding),
+                  Flexible(
+                    flex: 1,
+                    child: RoleSwitch(),
                   ),
                   const SizedBox(width: defaultPadding),
                   Flexible(
@@ -79,6 +86,7 @@ class DebugPanel extends ConsumerWidget {
                 ],
               ),
             ),
+            const SizedBox(height: defaultPadding),
             Flexible(
               flex: 0,
               child: Row(
