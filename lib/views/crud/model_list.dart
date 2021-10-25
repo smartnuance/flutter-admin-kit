@@ -19,6 +19,7 @@ class ModelObjectList extends ConsumerStatefulWidget {
 
 class _ModelObjectListState extends ConsumerState<ModelObjectList> {
   final _scrollController = ScrollController();
+  final _scrollControllerHorizontal = ScrollController();
   final FocusNode _focusNode = FocusNode();
   final Set<int> selected = {};
   bool multiSelectMode = false;
@@ -26,6 +27,7 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _scrollControllerHorizontal.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -71,35 +73,40 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
                     }
                   },
                   child: Scrollbar(
-                    controller: _scrollController,
+                    controller:
+                        _scrollControllerHorizontal, // TODO figure out how to use two scrollbars for each direction
                     interactive: true,
                     isAlwaysShown: true,
                     showTrackOnHover: true,
                     child: SingleChildScrollView(
-                      controller: _scrollController,
+                      controller: _scrollControllerHorizontal,
                       scrollDirection: Axis.horizontal,
-                      child: GestureDetector(
-                        onLongPress: () {
-                          setState(() {
-                            multiSelectMode = true;
-                          });
-                        },
-                        child: DataTable(
-                          showCheckboxColumn: multiSelectMode,
-                          columns: spec.infos[meta]!.fieldInfos.values
-                              .map(
-                                (info) => DataColumn(
-                                  numeric: [IntegerInfo, FloatInfo]
-                                      .contains(info.runtimeType),
-                                  label: Text(
-                                    info.label,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        scrollDirection: Axis.vertical,
+                        child: GestureDetector(
+                          onLongPress: () {
+                            setState(() {
+                              multiSelectMode = true;
+                            });
+                          },
+                          child: DataTable(
+                            showCheckboxColumn: multiSelectMode,
+                            columns: spec.infos[meta]!.fieldInfos.values
+                                .map(
+                                  (info) => DataColumn(
+                                    numeric: [IntegerInfo, FloatInfo]
+                                        .contains(info.runtimeType),
+                                    label: Text(
+                                      info.label,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(growable: false),
-                          rows: instances
-                              .map<DataRow>((e) => _buildRow(context, e))
-                              .toList(growable: false),
+                                )
+                                .toList(growable: false),
+                            rows: instances
+                                .map<DataRow>((e) => _buildRow(context, e))
+                                .toList(growable: false),
+                          ),
                         ),
                       ),
                     ),
