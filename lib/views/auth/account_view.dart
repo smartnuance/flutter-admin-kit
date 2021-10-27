@@ -13,8 +13,9 @@ import 'package:i18n_extension/default.i18n.dart';
 
 final roles = <String, String>{
   'super admin': 'Super Admin'.i18n,
-  'admin': 'Admin'.i18n,
+  'instance admin': 'Instance Admin'.i18n,
   'event organizer': 'Event Organizer'.i18n,
+  'teacher': 'Teacher'.i18n,
   noRole: 'Anonymous'.i18n,
 };
 
@@ -93,15 +94,23 @@ class AccountView extends ConsumerWidget {
   }
 }
 
+final switchRolesProvider = Provider<List<String>>(
+  (ref) {
+    return ref.watch(userProvider
+        .select((user) => user.data?.value.tokens?.switchRoles ?? [noRole]));
+  },
+);
+
 class RoleSwitch extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final role = ref.watch(currentRoleProvider);
+    final switchRoles = ref.watch(switchRolesProvider);
 
-    final items = roles.entries.map<DropdownMenuItem<String>>((entry) {
+    final items = switchRoles.map<DropdownMenuItem<String>>((role) {
       return DropdownMenuItem<String>(
-        value: entry.key,
-        child: Text(entry.value),
+        value: role,
+        child: Text(roles[role] ?? role),
       );
     }).toList();
     return DropdownButtonFormField<String>(

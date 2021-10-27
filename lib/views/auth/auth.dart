@@ -63,6 +63,7 @@ class TokenPair with _$TokenPair {
     required String refresh,
     required String access,
     @Default(noRole) String role,
+    @Default(<String>[]) List<String> switchRoles,
   }) = _TokenPair;
 
   const TokenPair._();
@@ -92,6 +93,7 @@ class TokenPair with _$TokenPair {
       refresh: refreshToken,
       access: accessToken,
       role: data['role'] as String? ?? noRole,
+      switchRoles: List<String>.from(data['switchRoles'] as List<dynamic>),
     );
   }
 
@@ -100,6 +102,7 @@ class TokenPair with _$TokenPair {
       'accessToken': access,
       'refreshToken': refresh,
       'role': role,
+      'switchRoles': switchRoles,
     };
   }
 }
