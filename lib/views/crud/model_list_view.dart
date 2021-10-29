@@ -35,7 +35,8 @@ class ModelListView extends ConsumerWidget {
                   iconSize: 20,
                   splashRadius: 30,
                   icon: const Icon(Icons.refresh),
-                  onPressed: () => ref.refresh(modelListProvider(meta)),
+                  onPressed: () =>
+                      ref.read(modelItemsProvider(meta).notifier).reload(),
                 ),
                 const Spacer(),
                 ElevatedButton.icon(

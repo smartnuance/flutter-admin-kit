@@ -4,24 +4,146 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'model_instance.freezed.dart';
 
 @freezed
-class ModelInstance with _$ModelInstance {
-  factory ModelInstance({
+class InfiniteList with _$InfiniteList {
+  factory InfiniteList.notLoaded() = _NotLoadedInfiniteList;
+
+  factory InfiniteList.loading({required ModelSpec modelSpec}) =
+      _LoadingInfiniteList;
+
+  factory InfiniteList.loaded({
+    required ModelSpec modelSpec,
+    required ModelItems modelItems,
+  }) = _LoadedInfiniteList;
+
+  factory InfiniteList.reloading({
+    required ModelSpec modelSpec,
+    required ModelItems modelItems,
+  }) = _ReloadingInfiniteList;
+
+  factory InfiniteList.extending({
+    required ModelSpec modelSpec,
+    required ModelItems modelItems,
+  }) = _ExtendingInfiniteList;
+
+  factory InfiniteList.error(Object error, [StackTrace? stackTrace]) =
+      _ErrorInfiniteList;
+
+  InfiniteList._();
+}
+
+@freezed
+class PageSpec with _$PageSpec {
+  factory PageSpec({
+    String? start,
+    String? end,
+    required int pageSize,
+  }) = _PageSpec;
+
+  const PageSpec._();
+
+  factory PageSpec.fromMap(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw StateError('missing data for PageSpec');
+    }
+
+    return PageSpec(
+      start: data['start'],
+      end: data['end'],
+      pageSize: data['size'],
+    );
+  }
+
+  Map<String, String> queryParams() {
+    final p = <String, String>{
+      'l': pageSize.toString(),
+    };
+
+    if (start != null) {
+      p['s'] = start!;
+    }
+    if (end != null) {
+      p['e'] = end!;
+    }
+    return p;
+  }
+
+  PageSpec extend(PageSpec right) => PageSpec(
+        start: start,
+        end: right.end,
+        pageSize: pageSize + right.pageSize,
+      );
+}
+
+@freezed
+class Paging with _$Paging {
+  factory Paging({
+    PageSpec? previous,
+    required PageSpec current,
+    PageSpec? next,
+  }) = _Paging;
+
+  const Paging._();
+
+  factory Paging.fromMap(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw StateError('missing data for Paging');
+    }
+
+    if (data['cur'] == null) {
+      throw StateError('missing paging.current');
+    }
+
+    return Paging(
+      previous: data['prev'] != null ? PageSpec.fromMap(data['prev']) : null,
+      current: PageSpec.fromMap(data['cur']),
+      next: data['next'] != null ? PageSpec.fromMap(data['next']) : null,
+    );
+  }
+}
+
+@freezed
+class ModelItems with _$ModelItems {
+  factory ModelItems({
+    required List<ModelItem> items,
+    required Paging paging,
+  }) = _ModelItems;
+
+  const ModelItems._();
+
+  factory ModelItems.fromMap(
+      ModelSpec spec, ModelMeta meta, Map<String, dynamic>? data) {
+    if (data == null) {
+      throw StateError('missing data for ModelItems');
+    }
+
+    return ModelItems(
+      items: List.from(data['items'] as List<dynamic>)
+          .map<ModelItem>((dynamic m) => ModelItem.fromMap(spec, meta, m))
+          .toList(growable: false),
+      paging: Paging.fromMap(data['paging']),
+    );
+  }
+}
+
+@freezed
+class ModelItem with _$ModelItem {
+  factory ModelItem({
     required ModelInfo info,
     @Default({}) Map<String, FieldValue> fields,
-  }) = _ModelInstance;
+  }) = _ModelItem;
 
-  const ModelInstance._();
+  const ModelItem._();
 
   FieldValue? get id => fields[info.idField];
 
-  factory ModelInstance.fromMap(
+  factory ModelItem.fromMap(
       ModelSpec spec, ModelMeta meta, Map<String, dynamic>? data) {
     if (data == null) {
-      throw StateError('missing data for ModelInstance');
+      throw StateError('missing data for ModelItem');
     }
     final info = spec.infos[meta];
     if (info == null) {
-      throw StateError('missing model info in spec for ModelInstance');
+      throw StateError('missing model info in spec for ModelItem');
     }
 
     final fields = <String, FieldValue>{};
@@ -29,11 +151,11 @@ class ModelInstance with _$ModelInstance {
       final fieldInfos = info.fieldInfos[fieldName];
       if (fieldInfos == null) {
         throw StateError(
-            'encountered unknown field $fieldName in ModelInstance not described in infos');
+            'encountered unknown field $fieldName in ModelItem not described in infos');
       }
       fields[fieldName] = FieldValue.fromMap(spec, fieldInfos, m);
     });
-    return ModelInstance(
+    return ModelItem(
       info: info,
       fields: fields,
     );
@@ -66,7 +188,7 @@ abstract class FieldValue {
       relationalID: (info) =>
           RelationalIDValue(info: info, value: data as String?),
       relationalContent: (info) => RelationalContentValue(
-          info: info, value: ModelInstance.fromMap(spec, info.meta, data)),
+          info: info, value: ModelItem.fromMap(spec, info.meta, data)),
     );
   }
 }
@@ -169,7 +291,7 @@ class RelationalIDValue extends FieldValue with _$RelationalIDValue {
 class RelationalContentValue extends FieldValue with _$RelationalContentValue {
   factory RelationalContentValue(
       {required RelationalContent info,
-      ModelInstance? value}) = _RelationalContentValue;
+      ModelItem? value}) = _RelationalContentValue;
 
   const RelationalContentValue._();
 }

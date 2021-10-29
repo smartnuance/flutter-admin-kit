@@ -46,7 +46,7 @@ final currentRoleProvider = Provider<String>(
 class Auth extends StateNotifier<AsyncValue<User>> {
   Auth(this.ref, AsyncValue<User> user) : super(user);
 
-  late final ProviderRefBase ref;
+  final ProviderRefBase ref;
 
   Future<void> signInWithCredential(
       {required String username, required String password}) async {

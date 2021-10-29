@@ -19,7 +19,7 @@ class APIService {
     };
   }
 
-  Future<ModelSpec> retrieveModelSpec(ModelMeta meta) async {
+  Future<ModelSpec> fetchModelSpec(ModelMeta meta) async {
     final url = baseURI.resolve(p.join(meta.service, 'info', meta.model));
     final response = await tokenClient.get(
       url,
@@ -39,17 +39,18 @@ class APIService {
     }
   }
 
-  Future<Iterable<ModelInstance>> retrieveList(
-      ModelSpec spec, ModelMeta meta) async {
-    final url = baseURI.resolve(p.join(meta.service, meta.model, 'list'));
+  Future<ModelItems> fetchItems(ModelSpec spec, ModelMeta meta,
+      [PageSpec? page]) async {
+    final url = baseURI
+        .resolve(p.join(meta.service, meta.model, 'list'))
+        .replace(queryParameters: page?.queryParams() ?? {});
     final response = await tokenClient.get(
       url,
       headers: _headers(),
     );
     switch (response.statusCode) {
       case HttpStatus.ok:
-        return List<Map<String, dynamic>>.from(json.decode(response.body))
-            .map<ModelInstance>((m) => ModelInstance.fromMap(spec, meta, m));
+        return ModelItems.fromMap(spec, meta, json.decode(response.body));
       case HttpStatus.unauthorized:
         throw NotAuthorizedException();
       case HttpStatus.forbidden:

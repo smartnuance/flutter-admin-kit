@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:i18n_extension/default.i18n.dart';
 import 'package:intl/intl.dart';
 
 class ModelObjectList extends ConsumerStatefulWidget {
@@ -38,103 +39,64 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
       service: 'event',
       model: 'workshop',
     );
-    final spec_ = ref.watch(modelSpecProvider(meta));
+    final spec = ref.watch(modelSpecProvider(meta));
+    final modelItems = ref.watch(modelItemsProvider(meta));
+    final modelItemsNotifier = ref.watch(modelItemsProvider(meta).notifier);
 
-    return spec_.when(
+    return spec.when(
       data: (spec) {
-        final modelList = ref.watch(modelListProvider(meta));
-        return modelList.when(
-          data: (instances) {
-            if (instances.isNotEmpty) {
-              return GestureDetector(
-                onTap: () {
-                  _focusNode.requestFocus();
-                },
-                child: RawKeyboardListener(
-                  focusNode: _focusNode,
-                  onKey: (event) {
-                    if (event.runtimeType == RawKeyDownEvent &&
-                        [
-                          LogicalKeyboardKey.controlLeft,
-                          LogicalKeyboardKey.controlRight
-                        ].contains(event.logicalKey)) {
-                      setState(() {
-                        multiSelectMode = true;
-                      });
-                    }
-                    if (event.runtimeType == RawKeyUpEvent &&
-                        [
-                          LogicalKeyboardKey.controlLeft,
-                          LogicalKeyboardKey.controlRight
-                        ].contains(event.logicalKey)) {
-                      setState(() {
-                        multiSelectMode = false || selected.isNotEmpty;
-                      });
-                    }
-                  },
-                  child: Scrollbar(
-                    controller:
-                        _scrollControllerHorizontal, // TODO figure out how to use two scrollbars for each direction
-                    interactive: true,
-                    isAlwaysShown: true,
-                    showTrackOnHover: true,
-                    child: SingleChildScrollView(
-                      controller: _scrollControllerHorizontal,
-                      scrollDirection: Axis.horizontal,
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        scrollDirection: Axis.vertical,
-                        child: GestureDetector(
-                          onLongPress: () {
-                            setState(() {
-                              multiSelectMode = true;
-                            });
-                          },
-                          child: DataTable(
-                            showCheckboxColumn: multiSelectMode,
-                            columns: spec.infos[meta]!.fieldInfos.values
-                                .map(
-                                  (info) => DataColumn(
-                                    numeric: [IntegerInfo, FloatInfo]
-                                        .contains(info.runtimeType),
-                                    label: Text(
-                                      info.label,
-                                    ),
-                                  ),
-                                )
-                                .toList(growable: false),
-                            rows: instances
-                                .map<DataRow>((e) => _buildRow(context, e))
-                                .toList(growable: false),
-                          ),
-                        ),
+        return RefreshIndicator(
+          onRefresh: () async {
+            await Future.wait([
+              Future.delayed(const Duration(seconds: 1)),
+              modelItemsNotifier.reload(),
+            ]);
+          },
+          child: modelItems.when(
+            notLoaded: () => const ProgressStatus(message: 'not loaded'),
+            loading: (_) =>
+                const ProgressStatus(message: 'loading model items'),
+            loaded: (_, modelItems) => _buildTable(
+              context,
+              modelItems,
+              spec,
+              meta,
+              modelItemsNotifier,
+              footer: modelItems.paging.next != null
+                  ? Align(
+                      alignment: Alignment.topCenter,
+                      child: OutlinedButton(
+                        child: Text('Load more'.i18n),
+                        onPressed: () => {modelItemsNotifier.extend()},
                       ),
-                    ),
-                  ),
-                ),
+                    )
+                  : null,
+            ),
+            reloading: (_, modelItems) => _buildTable(
+              context,
+              modelItems,
+              spec,
+              meta,
+              modelItemsNotifier,
+            ),
+            extending: (_, modelItems) => _buildTable(
+              context,
+              modelItems,
+              spec,
+              meta,
+              modelItemsNotifier,
+              footer: const ProgressStatus(message: 'loading more items'),
+            ),
+            error: (error, _) {
+              return ErrorActions(
+                error,
+                onRetry: () async => modelItemsNotifier.load(spec),
               );
-            } else {
-              return const Center(
-                child: SizedBox(
-                  height: 20,
-                  child: Center(
-                    child: Text('No results found.'),
-                  ),
-                ),
-              );
-            }
-          },
-          loading: () =>
-              const ProgressStatus(message: 'loading model instances'),
-          error: (error, stackTrace) {
-            return ErrorActions(
-              error,
-              onRetry: () => ref.refresh(modelListProvider(meta)),
-            );
-          },
+            },
+          ),
         );
       },
-      loading: () => const ProgressStatus(message: 'loading model info'),
+      loading: () => const ProgressStatus(message: 'loading model spec'),
       error: (error, stackTrace) {
         return ErrorActions(
           error,
@@ -144,7 +106,101 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
     );
   }
 
-  DataRow _buildRow(BuildContext context, ModelInstance instance) {
+  Widget _buildTable(BuildContext context, ModelItems modelItems,
+      ModelSpec spec, ModelMeta meta, ModelItemsNotifier modelItemsNotifier,
+      {Widget? footer}) {
+    if (modelItems.items.isNotEmpty) {
+      return GestureDetector(
+        onTap: () {
+          _focusNode.requestFocus();
+        },
+        child: RawKeyboardListener(
+          focusNode: _focusNode,
+          onKey: (event) {
+            if (event.runtimeType == RawKeyDownEvent &&
+                [
+                  LogicalKeyboardKey.controlLeft,
+                  LogicalKeyboardKey.controlRight
+                ].contains(event.logicalKey)) {
+              setState(() {
+                multiSelectMode = true;
+              });
+            }
+            if (event.runtimeType == RawKeyUpEvent &&
+                [
+                  LogicalKeyboardKey.controlLeft,
+                  LogicalKeyboardKey.controlRight
+                ].contains(event.logicalKey)) {
+              setState(() {
+                multiSelectMode = false || selected.isNotEmpty;
+              });
+            }
+          },
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            scrollDirection: Axis.vertical,
+            // ensure scrolling is also enabled when list fits into parent to show refresh indicator on pull-on-top
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Scrollbar(
+              controller: _scrollControllerHorizontal,
+              interactive: true,
+              isAlwaysShown: true,
+              showTrackOnHover: true,
+              scrollbarOrientation: ScrollbarOrientation.top,
+              child: Column(
+                children: [
+                  SingleChildScrollView(
+                    controller: _scrollControllerHorizontal,
+                    scrollDirection: Axis.horizontal,
+                    child: GestureDetector(
+                      onLongPress: () {
+                        setState(() {
+                          multiSelectMode = true;
+                        });
+                      },
+                      child: DataTable(
+                        showCheckboxColumn: multiSelectMode,
+                        columns: spec.infos[meta]!.fieldInfos.values
+                            .map(
+                              (info) => DataColumn(
+                                numeric: [IntegerInfo, FloatInfo]
+                                    .contains(info.runtimeType),
+                                label: Text(
+                                  info.label,
+                                ),
+                              ),
+                            )
+                            .toList(growable: false),
+                        rows: modelItems.items
+                            .map<DataRow>((e) => _buildRow(context, e))
+                            .toList(growable: false),
+                      ),
+                    ),
+                  ),
+                  if (footer != null)
+                    Flexible(
+                      flex: 0,
+                      child: footer,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      return const Center(
+        child: SizedBox(
+          height: 20,
+          child: Center(
+            child: Text('No results found.'),
+          ),
+        ),
+      );
+    }
+  }
+
+  DataRow _buildRow(BuildContext context, ModelItem instance) {
     final dynamic idHashCode = instance.id?.value.hashCode;
 
     return DataRow(

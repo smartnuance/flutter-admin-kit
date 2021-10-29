@@ -36,7 +36,7 @@ void main() {
       {
         final file = File('test/crud/modelInstance.json');
         final jsonStr = await file.readAsString();
-        final modelInstance = ModelInstance.fromMap(
+        final modelInstance = ModelItem.fromMap(
             spec,
             ModelMeta(service: 'event', model: 'workshop'),
             json.decode(jsonStr));
