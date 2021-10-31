@@ -67,7 +67,7 @@ class Header extends ConsumerWidget {
             const SizedBox(width: defaultDensePadding),
             MessageButton(),
             const SizedBox(width: defaultDensePadding),
-            ProfileButton(),
+            ProfileButton(compact: DeviceSize.isMobile(context)),
           ]
         ],
       ),
