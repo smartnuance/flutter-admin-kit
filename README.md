@@ -1,10 +1,14 @@
 # flutter admin kit
 
-Build a generative, customized admin for all platforms. Nice to use and nice to extend.
+A generative, customized admin for all platforms. Nice to use and nice to extend.
 
-Learn more in the [introductory blog post & videos](https://smartnuance.com/blog/flutter-admin-kit/) from the creator.
+Learn more in the [introductory blog post & videos](https://smartnuance.com/blog/flutter-admin-kit/).
 
-**Feature highlights:**
+## A note on the backend
+
+This project is integrated with a [compatible microservice backend built with Go](https://github.com/smartnuance/saas-kit). Since this frontend uses REST APIs, it can be used with any backend providing the necessary endpoints for authentication, UI configuration and depending on those, CRUD operations.
+
+## Feature highlights
 
 Declarative routing via global state:
 ![Login view](dashboard-view.png)
@@ -17,11 +21,7 @@ Authentication with OAuth based on auto-refreshed JWTs:
 
 Debug panel for live inspection of global state
 
-**A note on the backend:**
-
-This example repository is integrated with a Django backend using [Django REST framework](https://www.django-rest-framework.org/). It can be easily adopted to any REST backend that provides some means of inspecting models via the API.
-
-**Packages used:**
+## Packages used
 
 State management
 - [freezed_annotation](https://pub.dev/packages/freezed_annotation)
@@ -56,6 +56,6 @@ Asset handling:
 
 - [Poppin](https://fonts.google.com/specimen/Poppins)
 
-**Credits**
+## Credits
 
-- The basic dashbaord layout and responsive foundation was adopted from [Responsive Admin Panel or Dashboard - Flutter UI](https://github.com/abuanwar072/Flutter-Responsive-Admin-Panel-or-Dashboard)
+- The basic dashboard layout and responsive foundation was adopted from [Responsive Admin Panel or Dashboard - Flutter UI](https://github.com/abuanwar072/Flutter-Responsive-Admin-Panel-or-Dashboard)
