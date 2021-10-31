@@ -65,7 +65,14 @@ class DebugPanel extends ConsumerWidget {
                     flex: 1,
                     child: RoleSwitch(),
                   ),
-                  const SizedBox(width: defaultPadding),
+                ],
+              ),
+            ),
+            const SizedBox(height: defaultPadding),
+            Flexible(
+              flex: 0,
+              child: Row(
+                children: [
                   Flexible(
                     flex: 0,
                     child: TextButton.icon(
