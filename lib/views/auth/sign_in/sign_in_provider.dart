@@ -42,8 +42,9 @@ class SignInFormState extends StateNotifier<SignInForm> {
     await state.when(
       login: (email, password, isLoading, submitted) =>
           auth.signInWithCredential(username: email, password: password),
-      register: (email, password, isLoading, submitted) =>
-          auth.createUserWithEmailAndPassword(email: email, password: password),
+      register: (email, password, isLoading, submitted) async {
+        return auth.signUp(email: email, password: password);
+      },
       passwordReset: (email, password, isLoading, submitted) =>
           auth.sendPasswordResetEmail(email: email),
     );

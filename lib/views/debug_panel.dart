@@ -79,7 +79,7 @@ class DebugPanel extends ConsumerWidget {
                             username: 'simon@smartnuance.com',
                             password: 'f00bartest'),
                         icon: const Icon(Icons.manage_accounts),
-                        label: const Text('Login in test user')),
+                        label: const Text('Login test super admin user')),
                   ),
                   const SizedBox(width: defaultPadding),
                   Flexible(

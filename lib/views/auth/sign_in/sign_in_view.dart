@@ -96,6 +96,15 @@ class _SignInViewState extends ConsumerState<SignInView> {
     final bool success = await notifier.submit();
     if (success) {
       await state.maybeMap(
+        register: (value) async {
+          await showAlertDialog(
+            context: context,
+            title: 'Registered'.i18n,
+            content: 'The user is registered. You can now log in.'.i18n,
+            defaultActionText: 'OK'.i18n,
+          );
+          notifier.switchToLogin();
+        },
         passwordReset: (value) async {
           await showAlertDialog(
             context: context,
@@ -225,7 +234,7 @@ class _SignInViewState extends ConsumerState<SignInView> {
       key: const Key('email'),
       controller: _emailController,
       decoration: InputDecoration(
-        labelText: 'Email or username'.i18n,
+        labelText: 'Email'.i18n,
         hintText: 'test@test.com'.i18n,
         errorText: showErrorText
             ? (state.emailOrUsername.isEmpty

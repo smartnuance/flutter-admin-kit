@@ -63,4 +63,24 @@ class AuthService {
           'Failed with status code ${response.statusCode} to refresh token via $url');
     }
   }
+
+  Future<void> signUp(String name, String email, String password) async {
+    final url = baseURI.resolve('signup');
+    final response = await unauthClient.put(
+      url,
+      headers: _headers(),
+      body: jsonEncode(<String, String>{
+        'name': name,
+        'email': email,
+        'password': password,
+        'instance': 'smartnuance.com'
+      }),
+    );
+    if (response.statusCode == HttpStatus.created) {
+      return;
+    } else {
+      throw Exception(
+          'Failed with status code ${response.statusCode} to signup $url');
+    }
+  }
 }

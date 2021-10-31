@@ -141,8 +141,24 @@ class Auth extends StateNotifier<AsyncValue<User>> {
     await clearStoredUser();
   }
 
-  Future<void> createUserWithEmailAndPassword(
-      {required String email, required String password}) async {}
+  Future<bool> signUp({required String email, required String password}) async {
+    var name = email;
+    final i = name.lastIndexOf('@');
+    if (i != -1) {
+      name = name.substring(0, i);
+    }
+    try {
+      await ref.read(authServiceProvider).signUp(name, email, password);
+    } catch (error, stackTrace) {
+      ref.read(messagesProvider.notifier).error(
+            text: 'Error registering user in'.i18n,
+            error: error,
+            stackTrace: stackTrace,
+          );
+      return false;
+    }
+    return true;
+  }
 
   Future<void> sendPasswordResetEmail({required String email}) async {
     // TODO
