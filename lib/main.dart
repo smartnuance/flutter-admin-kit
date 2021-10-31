@@ -55,17 +55,21 @@ class AdminApp extends ConsumerWidget {
       const Color(0xff36d39a),
     );
 
+    final themeDate = ThemeData(
+      primarySwatch: swatch,
+      // CI secondary color
+      canvasColor: lighten(swatch.shade50, 0.2),
+      backgroundColor: Colors.white,
+      textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+      errorColor: const Color(0xffc74949),
+    );
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: title,
-      theme: ThemeData(
-          primarySwatch: swatch,
-          // CI secondary color
-          canvasColor: lighten(swatch.shade50, 0.2),
-          backgroundColor: Colors.white,
-          accentColor: const Color(0xff6467f1),
-          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-          errorColor: const Color(0xffc74949)),
+      theme: themeDate.copyWith(
+        colorScheme:
+            themeDate.colorScheme.copyWith(secondary: const Color(0xff6467f1)),
+      ),
       routerDelegate: delegate,
       routeInformationParser: _routeInformationParser,
       localizationsDelegates: const [
