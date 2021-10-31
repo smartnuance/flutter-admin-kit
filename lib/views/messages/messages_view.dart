@@ -43,39 +43,62 @@ class MessagesView extends ConsumerWidget {
 }
 
 Widget _buildMessage(
-    BuildContext context, int index, Message m, VoidCallback delete) {
-  return ListTile(
-    title: Text(
-      m.text,
-      style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: m.isError ? Theme.of(context).errorColor : Colors.black),
-    ),
-    subtitle: Text(
-      m.detail ?? (m.isError ? m.error.toString() : ''),
-    ),
-    leading: m.isError
-        ? Icon(
-            Icons.warning_amber_outlined,
-            color: Theme.of(context).errorColor,
-            size: 30,
-          )
-        : const Icon(
-            Icons.info_outline,
-            size: 30,
+    BuildContext context, int index, Message message, VoidCallback delete) {
+  return message.when(
+      info: (text, timestamp, detail, showSnack) => ListTile(
+            title: Text(
+              text,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            subtitle: Text(
+              detail ?? '',
+            ),
+            leading: const Icon(
+              Icons.info_outline,
+              size: 30,
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: delete,
+            ),
+            onTap: () => showAlertDialog(
+              context: context,
+              title: text,
+              content: detail ?? '',
+              defaultActionText: 'OK',
+            ),
+            hoverColor: Colors.grey,
           ),
-    trailing: IconButton(
-      icon: const Icon(Icons.delete),
-      onPressed: delete,
-    ),
-    onTap: () => showAlertDialog(
-      context: context,
-      title: m.isError ? m.error.toString() : m.text,
-      content: m.isError
-          ? (m.stackTrace?.toString() ?? m.detail ?? '')
-          : (m.detail ?? ''),
-      defaultActionText: 'OK',
-    ),
-    hoverColor: Colors.grey,
-  );
+      error: (text, timestamp, error, stackTrace, canRetry, showSnack) =>
+          ListTile(
+            title: Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).errorColor,
+              ),
+            ),
+            subtitle: Text(
+              error?.toString() ?? '',
+            ),
+            leading: Icon(
+              Icons.warning_amber_outlined,
+              color: Theme.of(context).errorColor,
+              size: 30,
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: delete,
+            ),
+            onTap: () => showAlertDialog(
+              context: context,
+              title: error?.toString() ?? '',
+              content: stackTrace?.toString() ?? '',
+              defaultActionText: 'OK',
+            ),
+            hoverColor: Colors.grey,
+          ));
 }

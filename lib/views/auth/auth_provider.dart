@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:admin/views/auth/auth.dart';
 import 'package:admin/views/crud/api_provider.dart';
-import 'package:admin/views/messages/message_model.dart';
 import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_interceptor/http/http.dart';
@@ -55,11 +54,10 @@ class Auth extends StateNotifier<AsyncValue<User>> {
         if (!user.isAnonymous) {
           final msg =
               'Another user "${user.username}" is still logged in.'.i18n;
-          ref.read(messagesProvider.notifier).publish(Message(
+          ref.read(messagesProvider.notifier).error(
                 text: msg,
-                detail: 'To log in another user, log out first!'.i18n,
                 error: msg,
-              ));
+              );
           return state;
         }
         final updated = await AsyncValue.guard<User>(() async {
@@ -71,16 +69,17 @@ class Auth extends StateNotifier<AsyncValue<User>> {
         updated.when(
           data: (user) {
             storeUser(user);
-            ref.read(messagesProvider.notifier).publish(
-                Message(text: 'Successfully logged in as ${user.username}'));
+            ref
+                .read(messagesProvider.notifier)
+                .info(text: 'Successfully logged in as ${user.username}');
           },
           loading: (_) => {},
           error: (error, stackTrace, _) {
-            ref.read(messagesProvider.notifier).publish(Message(
+            ref.read(messagesProvider.notifier).error(
                   text: 'Error logging in $username',
                   error: error,
                   stackTrace: stackTrace,
-                ));
+                );
           },
         );
         return updated;
@@ -89,12 +88,12 @@ class Auth extends StateNotifier<AsyncValue<User>> {
         return state;
       },
       error: (error, stackTrace, _) {
-        ref.read(messagesProvider.notifier).publish(Message(
+        ref.read(messagesProvider.notifier).error(
               text:
                   'Cannot login as long as error present: ${error.toString()}',
               error: error,
               stackTrace: stackTrace,
-            ));
+            );
         return AsyncValue<User>.error(error);
       },
     );
@@ -117,11 +116,11 @@ class Auth extends StateNotifier<AsyncValue<User>> {
       },
       loading: (_) => {},
       error: (error, stackTrace, _) =>
-          ref.read(messagesProvider.notifier).publish(Message(
+          ref.read(messagesProvider.notifier).error(
                 text: error.toString(),
                 error: error,
                 stackTrace: stackTrace,
-              )),
+              ),
     );
   }
 
@@ -164,7 +163,7 @@ class AuthInterceptor implements InterceptorContract {
           'Attempt to access the access token to intercept and authenticate a request but no access token is available.');
       ref
           .read(messagesProvider.notifier)
-          .publish(Message(text: error.toString(), error: error));
+          .error(text: error.toString(), error: error);
       return data;
     }
     developer.log('intercepted and added token ${tokens.toString()}');
@@ -193,8 +192,8 @@ class ExpiredTokenRetryPolicy extends RetryPolicy {
         await auth.refreshToken();
         return true;
       } catch (e) {
-        ref.read(messagesProvider.notifier).publish(Message(
-            text: 'Refreshing tokens failed after receiving 401.', error: e));
+        ref.read(messagesProvider.notifier).error(
+            text: 'Refreshing tokens failed after receiving 401.', error: e);
       }
     }
     return false;

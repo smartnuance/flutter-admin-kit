@@ -38,6 +38,34 @@ class MessagesState extends StateNotifier<MessageList> {
     }
   }
 
+  void info({
+    required String text,
+    String? detail,
+    bool showSnack = true,
+  }) {
+    publish(Message.info(
+        text: text,
+        timestamp: DateTime.now(),
+        detail: detail,
+        showSnack: showSnack));
+  }
+
+  void error({
+    required String text,
+    Object? error,
+    StackTrace? stackTrace,
+    bool canRetry = false,
+    bool showSnack = true,
+  }) {
+    publish(Message.error(
+        text: text,
+        timestamp: DateTime.now(),
+        error: error,
+        stackTrace: stackTrace,
+        canRetry: canRetry,
+        showSnack: showSnack));
+  }
+
   void delete(int index) {
     state.items.removeAt(index);
     state = state;

@@ -5,7 +5,6 @@ import 'package:admin/views/crud/api_provider.dart';
 import 'package:admin/views/crud/api_service.dart';
 import 'package:admin/views/crud/models/model_infos.dart';
 import 'package:admin/views/crud/models/model_instance.dart';
-import 'package:admin/views/messages/message_model.dart';
 import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,11 +20,11 @@ final modelSpecProvider =
       error: error,
       stackTrace: stackTrace,
     );
-    ref.read(messagesProvider.notifier).publish(Message(
+    ref.read(messagesProvider.notifier).error(
           text: 'Error loading model info.',
           error: error,
           stackTrace: stackTrace,
-        ));
+        );
     return Future.error(error);
   }
   return modelInfo;
@@ -64,12 +63,11 @@ class ModelItemsNotifier extends StateNotifier<InfiniteList> {
         modelItems: await apiService.fetchItems(modelSpec, meta),
       );
     } catch (error, stackTrace) {
-      ref.read(messagesProvider.notifier).publish(Message(
+      ref.read(messagesProvider.notifier).error(
             text: 'Error loading list of model instances.',
-            detail: error.toString(),
             error: error,
             stackTrace: stackTrace,
-          ));
+          );
       state = InfiniteList.error(error, stackTrace);
     }
   }
@@ -88,12 +86,11 @@ class ModelItemsNotifier extends StateNotifier<InfiniteList> {
             modelItems: await apiService.fetchItems(modelSpec, meta),
           );
         } catch (error, stackTrace) {
-          ref.read(messagesProvider.notifier).publish(Message(
+          ref.read(messagesProvider.notifier).error(
                 text: 'Error loading list of model instances.',
-                detail: error.toString(),
                 error: error,
                 stackTrace: stackTrace,
-              ));
+              );
           state = InfiniteList.error(error, stackTrace);
         }
       },
@@ -129,12 +126,11 @@ class ModelItemsNotifier extends StateNotifier<InfiniteList> {
                   nextPageItems.copyWith(items: items, paging: unifiedPaging),
             );
           } catch (error, stackTrace) {
-            ref.read(messagesProvider.notifier).publish(Message(
+            ref.read(messagesProvider.notifier).error(
                   text: 'Error loading list of model instances.',
-                  detail: error.toString(),
                   error: error,
                   stackTrace: stackTrace,
-                ));
+                );
             state = InfiniteList.error(error, stackTrace);
           }
         }

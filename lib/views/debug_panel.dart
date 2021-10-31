@@ -1,7 +1,6 @@
 import 'package:admin/constants.dart';
 import 'package:admin/views/auth/account_view.dart';
 import 'package:admin/views/auth/auth_provider.dart';
-import 'package:admin/views/messages/message_model.dart';
 import 'package:admin/views/messages/message_provider.dart';
 import 'package:admin/views/ui_model.dart';
 import 'package:admin/views/ui_provider.dart';
@@ -136,23 +135,22 @@ class DebugPanel extends ConsumerWidget {
                     label: const Text('Info message'),
                     icon: const Icon(Icons.info_outline),
                     onPressed: () async =>
-                        ref.read(messagesProvider.notifier).publish(Message(
+                        ref.read(messagesProvider.notifier).info(
                               text: 'Test message',
                               detail:
                                   'This is a test message manually published by debug panel.',
-                            )),
+                            ),
                   ),
                   const SizedBox(width: defaultPadding),
                   TextButton.icon(
                     label: const Text('Error message'),
                     icon: const Icon(Icons.warning_amber_outlined),
                     onPressed: () async =>
-                        ref.read(messagesProvider.notifier).publish(Message(
+                        ref.read(messagesProvider.notifier).error(
                               text: 'Test error message',
-                              detail:
-                                  'This is a test message manually published by debug panel.',
-                              error: Exception('test exception'),
-                            )),
+                              error: Exception(
+                                  'This is a test message manually published by debug panel.'),
+                            ),
                   ),
                 ],
               ),

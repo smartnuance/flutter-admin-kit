@@ -4,18 +4,26 @@ part 'message_model.freezed.dart';
 
 @freezed
 class Message with _$Message {
-  factory Message({
+  factory Message.info({
     required String text,
+    required DateTime timestamp,
     String? detail,
+    @Default(true) bool showSnack,
+  }) = _Message;
+
+  factory Message.error({
+    required String text,
+    required DateTime timestamp,
     Object? error,
     StackTrace? stackTrace,
     @Default(false) bool canRetry,
     @Default(true) bool showSnack,
-  }) = _Message;
+  }) = _ErrorMessage;
 
   Message._();
 
-  bool get isError => error != null;
+  bool get isError => maybeMap(error: (_) => true, orElse: () => false);
+  bool get canRetry => maybeMap(error: (m) => m.canRetry, orElse: () => false);
 }
 
 @freezed
