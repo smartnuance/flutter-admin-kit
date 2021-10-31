@@ -97,7 +97,7 @@ class AccountView extends ConsumerWidget {
 final switchRolesProvider = Provider<List<String>>(
   (ref) {
     return ref.watch(userProvider
-        .select((user) => user.data?.value.tokens?.switchRoles ?? [noRole]));
+        .select((user) => user.asData?.value.tokens?.switchRoles ?? [noRole]));
   },
 );
 

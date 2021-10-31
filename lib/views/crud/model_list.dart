@@ -96,8 +96,8 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
           ),
         );
       },
-      loading: () => const ProgressStatus(message: 'loading model spec'),
-      error: (error, stackTrace) {
+      loading: (_) => const ProgressStatus(message: 'loading model spec'),
+      error: (error, stackTrace, _) {
         return ErrorActions(
           error,
           onRetry: () => ref.refresh(modelSpecProvider(meta)),

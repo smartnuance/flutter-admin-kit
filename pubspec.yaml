@@ -1,5 +1,5 @@
 name: admin
-description: A new Flutter project.
+description: A generative, customized admin for all platforms. Nice to use and nice to extend.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -34,7 +34,7 @@ dependencies:
   google_fonts: ^2.1.0
   flutter_svg: ^0.22.0
   fl_chart: ^0.40.0
-  flutter_riverpod: ^1.0.0-dev.7
+  flutter_riverpod: ^1.0.0-dev.10
   url_strategy: ^0.2.0
   universal_platform: ^1.0.0-nullsafety
   flutter_breadcrumb: ^1.0.1

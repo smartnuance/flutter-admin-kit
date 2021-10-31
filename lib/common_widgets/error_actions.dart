@@ -43,7 +43,7 @@ class ErrorActions extends ConsumerWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (user.data?.value.isAnonymous ?? true)
+                  if (user.asData?.value.isAnonymous ?? true)
                     OutlinedButton(
                       child: Text(
                         'Sign in'.i18n,

@@ -26,8 +26,8 @@ class ProfileButton extends ConsumerWidget {
                     .pushView(ViewId.account),
               ),
             ),
-      loading: () => const CircularProgressIndicator(strokeWidth: 2),
-      error: (error, stackTrace) =>
+      loading: (_) => const CircularProgressIndicator(strokeWidth: 2),
+      error: (error, stackTrace, _) =>
           const IconButton(icon: Icon(Icons.person_outline), onPressed: null),
     );
   }

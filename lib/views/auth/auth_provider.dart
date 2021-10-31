@@ -27,9 +27,9 @@ final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
   (ref) {
     final user = ref.watch(loadedUser).when(
           data: (user) => AsyncValue<User>.data(user),
-          loading: () => const AsyncValue<User>.loading(),
-          error: (error, stackTrace) =>
-              AsyncValue<User>.error(error, stackTrace),
+          loading: (_) => const AsyncValue<User>.loading(),
+          error: (error, stackTrace, _) =>
+              AsyncValue<User>.error(error, stackTrace: stackTrace),
         );
     return Auth(ref, user);
   },
@@ -38,8 +38,8 @@ final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
 /// Provides the current temporary role. Might deviate from the default role returned with tokens.
 final currentRoleProvider = Provider<String>(
   (ref) {
-    return ref.watch(
-        userProvider.select((user) => user.data?.value.currentRole ?? noRole));
+    return ref.watch(userProvider
+        .select((user) => user.asData?.value.currentRole ?? noRole));
   },
 );
 
@@ -74,8 +74,8 @@ class Auth extends StateNotifier<AsyncValue<User>> {
             ref.read(messagesProvider.notifier).publish(
                 Message(text: 'Successfully logged in as ${user.username}'));
           },
-          loading: () => {},
-          error: (error, stackTrace) {
+          loading: (_) => {},
+          error: (error, stackTrace, _) {
             ref.read(messagesProvider.notifier).publish(Message(
                   text: 'Error logging in $username',
                   error: error,
@@ -85,10 +85,10 @@ class Auth extends StateNotifier<AsyncValue<User>> {
         );
         return updated;
       },
-      loading: () {
+      loading: (_) {
         return state;
       },
-      error: (error, stackTrace) {
+      error: (error, stackTrace, _) {
         ref.read(messagesProvider.notifier).publish(Message(
               text:
                   'Cannot login as long as error present: ${error.toString()}',
@@ -101,7 +101,7 @@ class Auth extends StateNotifier<AsyncValue<User>> {
   }
 
   Future<void> refreshToken() async {
-    final currentTokens = state.data?.value.tokens;
+    final currentTokens = state.asData?.value.tokens;
     if (currentTokens == null) {
       state = AsyncValue.error(
           StateError('refresh failed since user has no tokens yet'));
@@ -115,8 +115,8 @@ class Auth extends StateNotifier<AsyncValue<User>> {
       data: (user) {
         state = AsyncValue.data(user.copyWith(tokens: tokens));
       },
-      loading: () => {},
-      error: (error, stackTrace) =>
+      loading: (_) => {},
+      error: (error, stackTrace, _) =>
           ref.read(messagesProvider.notifier).publish(Message(
                 text: error.toString(),
                 error: error,
@@ -157,7 +157,7 @@ class AuthInterceptor implements InterceptorContract {
 
   @override
   Future<RequestData> interceptRequest({required RequestData data}) async {
-    final tokens = ref.read(userProvider).data?.value.tokens;
+    final tokens = ref.read(userProvider).asData?.value.tokens;
     final role = ref.read(currentRoleProvider);
     if (tokens?.access == null) {
       final error = StateError(
