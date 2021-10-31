@@ -66,8 +66,8 @@ class MessagesState extends StateNotifier<MessageList> {
         showSnack: showSnack));
   }
 
-  void delete(int index) {
-    state.items.removeAt(index);
-    state = state;
+  void delete(Message message) {
+    state = state.copyWith(
+        items: state.items.where((m) => m != message).toList(growable: false));
   }
 }

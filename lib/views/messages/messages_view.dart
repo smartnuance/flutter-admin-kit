@@ -22,8 +22,7 @@ class MessagesView extends ConsumerWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               final m = messages.items[index];
-              void delete() =>
-                  ref.read(messagesProvider.notifier).delete(index);
+              void delete() => ref.read(messagesProvider.notifier).delete(m);
               return Dismissible(
                 key: UniqueKey(),
                 onDismissed: (direction) {
