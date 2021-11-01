@@ -25,7 +25,11 @@ import 'package:url_strategy/url_strategy.dart';
 final GlobalKey appKey = GlobalKey();
 
 Future<void> main() async {
-  setPathUrlStrategy();
+  const useHashRouter =
+      bool.fromEnvironment('HASH_ROUTER', defaultValue: false);
+  if (!useHashRouter) {
+    setPathUrlStrategy();
+  }
   Translations.missingKeyCallback = (key, locale) => {};
   Translations.missingTranslationCallback = (key, locale) => {};
   WidgetsFlutterBinding.ensureInitialized();
