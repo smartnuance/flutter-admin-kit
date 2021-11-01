@@ -30,4 +30,6 @@ jobs:
         with:
           webRenderer: canvaskit
           # activate hash routing because Github will not recognize paths and direct them to the app
-          customArgs: --dart-define="HASH_ROUTER=true"
+          customArgs: >
+            --dart-define="HASH_ROUTER=true"
+            --dart-define="BACKEND_URL=https://backend.admin-kit.smartnuance.com"

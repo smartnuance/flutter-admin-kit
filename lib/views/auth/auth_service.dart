@@ -6,10 +6,10 @@ import 'package:admin/views/auth/auth.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  AuthService(this.unauthClient);
+  AuthService(this.baseURI, this.unauthClient);
 
+  final Uri baseURI;
   final http.Client unauthClient;
-  final Uri baseURI = Uri.parse('http://localhost:8800/auth/');
 
   Map<String, String> _headers() {
     return {
@@ -19,7 +19,7 @@ class AuthService {
   }
 
   Future<TokenPair> signIn(String username, String password) async {
-    final url = baseURI.resolve('login');
+    final url = baseURI.resolve('auth/login');
     final response = await unauthClient.post(
       url,
       headers: _headers(),
@@ -39,7 +39,7 @@ class AuthService {
   }
 
   Future<TokenPair> refreshTokens(TokenPair tokens) async {
-    final url = baseURI.resolve('refresh');
+    final url = baseURI.resolve('auth/refresh');
     final response = await unauthClient.post(
       url,
       headers: _headers(),
@@ -65,7 +65,7 @@ class AuthService {
   }
 
   Future<void> signUp(String name, String email, String password) async {
-    final url = baseURI.resolve('signup');
+    final url = baseURI.resolve('auth/signup');
     final response = await unauthClient.put(
       url,
       headers: _headers(),

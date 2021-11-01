@@ -30,12 +30,18 @@ final apiServiceProvider = Provider.autoDispose<APIService>((ref) {
   // final auth = ref.watch(authStateChangesProvider);
   final client = ref.watch(_tokenHttpClientProvider).state;
 
-  return APIService(client);
+  const backendURL = String.fromEnvironment('BACKEND_URL',
+      defaultValue: 'http://localhost:8800/');
+
+  return APIService(Uri.parse(backendURL), client);
 });
 
 final authServiceProvider = Provider<AuthService>((ref) {
   // final auth = ref.watch(authStateChangesProvider);
   final unauthClient = ref.watch(_unauthHttpClientProvider).state;
 
-  return AuthService(unauthClient);
+  const backendURL = String.fromEnvironment('BACKEND_URL',
+      defaultValue: 'http://localhost:8800/');
+
+  return AuthService(Uri.parse(backendURL), unauthClient);
 });

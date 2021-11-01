@@ -7,10 +7,10 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
 class APIService {
-  APIService(this.tokenClient);
+  APIService(this.baseURI, this.tokenClient);
 
+  final Uri baseURI;
   final http.Client tokenClient;
-  final Uri baseURI = Uri.parse('http://localhost:8800/');
 
   Map<String, String> _headers() {
     return {
