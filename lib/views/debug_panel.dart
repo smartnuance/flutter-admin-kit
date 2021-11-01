@@ -19,8 +19,8 @@ class DebugPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(userProvider.notifier);
     final user = ref.watch(userProvider);
-    final accessToken = user.asData?.value.tokens?.access ?? '';
-    final refreshToken = user.asData?.value.tokens?.refresh ?? '';
+    final accessToken = ref.watch(tokensProvider)?.access ?? '';
+    final refreshToken = ref.watch(tokensProvider)?.refresh ?? '';
     final viewStack = ref.watch(viewStackProvider);
     final notFoundPath = ref.watch(notFoundPathProvider).state;
 
@@ -52,8 +52,8 @@ class DebugPanel extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: user.when(
-                      data: (user) => _buildCopyableText('User:',
-                          '${user.username.isNotEmpty ? user.username : '<anonymous user>'} (${user.displayName ?? '<no display name>'})'),
+                      data: (user) =>
+                          _buildCopyableText('User:', user.toString()),
                       loading: (_) => const LinearProgressIndicator(),
                       error: (error, stackTrace, _) =>
                           _buildCopyableText('Error:', error.toString()),

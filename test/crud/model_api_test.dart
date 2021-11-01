@@ -11,7 +11,6 @@ void main() {
       final file = File('test/crud/modelSpecs.json');
       final jsonStr = await file.readAsString();
       final spec = ModelSpec.fromMap(json.decode(jsonStr));
-      print(spec.infos.keys);
       expect(spec.infos[ModelMeta(service: 'event', model: 'workshop')]?.name,
           'Workshop');
       expect(

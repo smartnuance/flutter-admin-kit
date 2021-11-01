@@ -38,7 +38,14 @@ final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
 final currentRoleProvider = Provider<String>(
   (ref) {
     return ref.watch(userProvider
-        .select((user) => user.asData?.value.currentRole ?? noRole));
+        .select((user) => user.asData?.value.orNull?.currentRole ?? noRole));
+  },
+);
+
+final tokensProvider = Provider<TokenPair?>(
+  (ref) {
+    return ref.watch(
+        userProvider.select((user) => user.asData?.value.orNull?.tokens));
   },
 );
 
@@ -52,8 +59,7 @@ class Auth extends StateNotifier<AsyncValue<User>> {
     state = await state.when(
       data: (user) async {
         if (!user.isAnonymous) {
-          final msg =
-              'Another user "${user.username}" is still logged in.'.i18n;
+          final msg = 'Another user $user is still logged in.'.i18n;
           ref.read(messagesProvider.notifier).error(
                 text: msg,
                 error: msg,
@@ -64,14 +70,14 @@ class Auth extends StateNotifier<AsyncValue<User>> {
           final tokens =
               await ref.read(authServiceProvider).signIn(username, password);
           return User(
-              username: username, tokens: tokens, currentRole: tokens.role);
+              email: username, tokens: tokens, currentRole: tokens.role);
         });
         updated.when(
           data: (user) {
             storeUser(user);
             ref
                 .read(messagesProvider.notifier)
-                .info(text: 'Successfully logged in as ${user.username}');
+                .info(text: 'Successfully logged in as $user');
           },
           loading: (_) => {},
           error: (error, stackTrace, _) {
@@ -100,19 +106,19 @@ class Auth extends StateNotifier<AsyncValue<User>> {
   }
 
   Future<void> refreshToken() async {
-    final currentTokens = state.asData?.value.tokens;
-    if (currentTokens == null) {
-      state = AsyncValue.error(
-          StateError('refresh failed since user has no tokens yet'));
-      return;
-    }
-    // do NOT set the state to loading here to avoid showing loading indicators wherever the user provider is user
-    final tokens =
-        await ref.read(authServiceProvider).refreshTokens(currentTokens);
-
     state.when(
-      data: (user) {
-        state = AsyncValue.data(user.copyWith(tokens: tokens));
+      data: (user) async {
+        await user.mapOrNull((user) async {
+          if (user.tokens == null) {
+            state = AsyncValue.error(
+                StateError('refresh failed since user has no tokens yet'));
+            return;
+          }
+          // do NOT set the state to loading here to avoid showing loading indicators wherever the user provider is user
+          final newTokens =
+              await ref.read(authServiceProvider).refreshTokens(user.tokens!);
+          state = AsyncValue.data(user.copyWith(tokens: newTokens));
+        });
       },
       loading: (_) => {},
       error: (error, stackTrace, _) =>
@@ -127,9 +133,11 @@ class Auth extends StateNotifier<AsyncValue<User>> {
   Future<void> switchRole(String? role) async {
     state.maybeWhen(
       data: (user) async {
-        final updatedUser = user.copyWith(currentRole: role ?? noRole);
-        state = AsyncValue.data(updatedUser);
-        await storeUser(updatedUser);
+        await user.mapOrNull((user) async {
+          final updatedUser = user.copyWith(currentRole: role ?? noRole);
+          state = AsyncValue.data(updatedUser);
+          await storeUser(updatedUser);
+        });
       },
       orElse: () => {},
     );
@@ -172,7 +180,7 @@ class AuthInterceptor implements InterceptorContract {
 
   @override
   Future<RequestData> interceptRequest({required RequestData data}) async {
-    final tokens = ref.read(userProvider).asData?.value.tokens;
+    final tokens = ref.read(tokensProvider);
     final role = ref.read(currentRoleProvider);
     if (tokens?.access == null) {
       final error = StateError(
@@ -223,7 +231,7 @@ Future<User?> loadUser() async {
     return null;
   }
   final user = User.fromMap(json.decode(userEnc) as Map<String, dynamic>);
-  developer.log('load user: ${user.username} as ${user.currentRole}');
+  developer.log('loaded user $user');
   return user;
 }
 
@@ -231,7 +239,7 @@ Future<void> storeUser(User user) async {
   final prefs = await SharedPreferences.getInstance();
   final encoded = json.encode(user.toMap());
   await prefs.setString('user', encoded);
-  developer.log('store user to ${user.username} as ${user.currentRole}');
+  developer.log('store user $user');
 }
 
 Future<void> clearStoredUser() async {

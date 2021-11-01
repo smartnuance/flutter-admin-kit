@@ -31,18 +31,18 @@ class AccountView extends ConsumerWidget {
         child: Column(
           children: [
             ...user.maybeWhen(
-                data: (user) => user.isAnonymous
-                    ? [
-                        const ErrorActions(
-                            'You cannot access the account page.')
-                      ]
-                    : [
-                        _buildUserInfo(user),
-                        const SizedBox(height: defaultPadding),
-                        RoleSwitch(),
-                        const SizedBox(height: defaultPadding),
-                        _buildButtons(context, auth),
-                      ],
+                data: (user) => user.when(
+                    (email, name, tokens, currentRole) => [
+                          _buildUserInfo(email, name),
+                          const SizedBox(height: defaultPadding),
+                          RoleSwitch(),
+                          const SizedBox(height: defaultPadding),
+                          _buildButtons(context, auth),
+                        ],
+                    anonymous: () => [
+                          const ErrorActions(
+                              'You cannot access the account page.')
+                        ]),
                 orElse: () => [Container()])
           ],
         ),
@@ -50,14 +50,13 @@ class AccountView extends ConsumerWidget {
     );
   }
 
-  Widget _buildUserInfo(User user) {
+  Widget _buildUserInfo(String email, String? name) {
     return Column(
       children: [
-        if (user.displayName != null)
-          Text(
-            user.displayName!,
-            style: const TextStyle(color: Colors.white),
-          ),
+        Text(
+          name ?? email,
+          style: const TextStyle(color: Colors.white),
+        ),
         const SizedBox(height: 8),
       ],
     );
@@ -94,18 +93,11 @@ class AccountView extends ConsumerWidget {
   }
 }
 
-final switchRolesProvider = Provider<List<String>>(
-  (ref) {
-    return ref.watch(userProvider
-        .select((user) => user.asData?.value.tokens?.switchRoles ?? [noRole]));
-  },
-);
-
 class RoleSwitch extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final role = ref.watch(currentRoleProvider);
-    final switchRoles = ref.watch(switchRolesProvider);
+    final switchRoles = ref.watch(tokensProvider)?.switchRoles ?? [noRole];
 
     final items = switchRoles.map<DropdownMenuItem<String>>((role) {
       return DropdownMenuItem<String>(

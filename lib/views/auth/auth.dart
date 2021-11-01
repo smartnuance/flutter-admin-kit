@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:admin/utils/string_manipulation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -8,31 +10,50 @@ const noRole = '';
 @freezed
 class User with _$User {
   factory User({
-    required String username,
-    String? displayName,
+    required String email,
+    String? name,
     TokenPair? tokens,
     @Default(noRole) String currentRole,
   }) = _User;
 
-  factory User.anonymous({
-    @Default('') String username,
-    @Default('') String? displayName,
-    @Default(null) TokenPair? tokens,
-    @Default(noRole) String currentRole,
-  }) = _AnonymousUser;
+  factory User.anonymous() = _AnonymousUser;
 
   User._();
 
-  late final isAnonymous = username == '';
+  _User? get orNull {
+    return mapOrNull(
+      (d) => d,
+    );
+  }
+
+  late final bool isAnonymous = maybeMap((_) => false, orElse: () => true);
+
+  late final List<String> switchRoles = whenOrNull<List<String>?>(
+          (email, name, tokens, currentRole) => tokens?.switchRoles) ??
+      [];
+
+  late final List<String> currentInheritedRoles = whenOrNull<List<String>?>(
+          (email, name, tokens, currentRole) =>
+              tokens?.inheritedRoles(currentRole)) ??
+      [];
+
+  @override
+  String toString() {
+    return when(
+      (email, name, tokens, currentRole) =>
+          name != null ? '$name<$email>' : email,
+      anonymous: () => '<anonymous>',
+    );
+  }
 
   factory User.fromMap(Map<String, dynamic>? data) {
     if (data == null) {
       throw StateError('missing data for User');
     }
 
-    final username = data['username'] as String?;
-    if (username == '') {
-      return User.anonymous(username: '');
+    final email = data['email'] as String?;
+    if (email == null || email == '') {
+      return User.anonymous();
     }
 
     final tokens = data['tokens'] as Map<String, dynamic>?;
@@ -40,20 +61,21 @@ class User with _$User {
         tokens != null ? TokenPair.fromMap(tokens) : null;
 
     return User(
-      username: username!,
-      displayName: data['displayName'] as String?,
+      email: email,
+      name: data['name'] as String?,
       tokens: tokenPair,
       currentRole: data['currentRole'] as String? ?? noRole,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'username': username,
-      'displayName': displayName,
-      'tokens': tokens?.toMap(),
-      'currentRole': currentRole,
-    };
+    return whenOrNull((email, name, tokens, currentRole) => {
+              'email': email,
+              'name': name,
+              'tokens': tokens?.toMap(),
+              'currentRole': currentRole,
+            }) ??
+        {};
   }
 }
 
@@ -63,10 +85,21 @@ class TokenPair with _$TokenPair {
     required String refresh,
     required String access,
     @Default(noRole) String role,
-    @Default(<String>[]) List<String> switchRoles,
+    @Default(<RolesSpecEntry>[]) List<RolesSpecEntry> rolesSpec,
   }) = _TokenPair;
 
-  const TokenPair._();
+  TokenPair._();
+
+  late final Map<String, List<String>> _rolesSpecMap = HashMap.fromIterable(
+      rolesSpec,
+      key: (dynamic e) => (e as RolesSpecEntry).role,
+      value: (dynamic e) => (e as RolesSpecEntry).inherited);
+
+  late final List<String> switchRoles =
+      _rolesSpecMap.keys.toList(growable: false);
+
+  List<String> inheritedRoles(String currentRole) =>
+      _rolesSpecMap[currentRole] ?? [];
 
   @override
   String toString() {
@@ -93,7 +126,10 @@ class TokenPair with _$TokenPair {
       refresh: refreshToken,
       access: accessToken,
       role: data['role'] as String? ?? noRole,
-      switchRoles: List<String>.from(data['switchRoles'] as List<dynamic>),
+      rolesSpec: (data['rolesSpec'] as List<dynamic>)
+          .map<RolesSpecEntry>(
+              (dynamic e) => RolesSpecEntry.fromMap(e as Map<String, dynamic>))
+          .toList(growable: false),
     );
   }
 
@@ -102,7 +138,45 @@ class TokenPair with _$TokenPair {
       'accessToken': access,
       'refreshToken': refresh,
       'role': role,
-      'switchRoles': switchRoles,
+      'rolesSpec': rolesSpec.map((e) => e.toMap()).toList(growable: false),
+    };
+  }
+}
+
+@freezed
+class RolesSpecEntry with _$RolesSpecEntry {
+  factory RolesSpecEntry({
+    required String role,
+    required List<String> inherited,
+  }) = _RolesSpecEntry;
+
+  const RolesSpecEntry._();
+
+  factory RolesSpecEntry.fromMap(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw StateError('missing data for RolesSpecEntry');
+    }
+
+    final role = data['role'] as String?;
+    if (role == null) {
+      throw Exception('Did not found role in RolesSpecEntry');
+    }
+
+    final inherited = data['inherited'] as List<dynamic>?;
+    if (inherited == null) {
+      throw StateError('missing inherited for RolesSpecEntry');
+    }
+
+    return RolesSpecEntry(
+      role: role,
+      inherited: List.castFrom<dynamic, String>(inherited),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'role': role,
+      'inherited': inherited,
     };
   }
 }

@@ -11,16 +11,19 @@ import '../constants.dart';
 import 'file_info_card.dart';
 
 class ErrorActions extends ConsumerWidget {
-  const ErrorActions(this.error, {this.onRetry, Key? key}) : super(key: key);
+  const ErrorActions(this.error, {this.onRetry, this.widget, Key? key})
+      : super(key: key);
 
   final Object error;
   final VoidCallback? onRetry;
+  final Widget? widget;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     return Center(
       child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(defaultPadding),
         decoration: BoxDecoration(
           border: Border(
@@ -69,9 +72,13 @@ class ErrorActions extends ConsumerWidget {
                     ),
                 ],
               )
-            ] else if (error.runtimeType == PermissionException)
-              const Text('You do not have permission to open this view.')
-            else
+            ] else if (error.runtimeType == PermissionException) ...[
+              const Text('You do not have permission to open this view.'),
+              if (widget != null) ...[
+                const SizedBox(height: defaultPadding),
+                widget!
+              ]
+            ] else
               Text(error.toString()),
           ],
         ),

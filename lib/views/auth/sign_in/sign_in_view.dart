@@ -57,9 +57,9 @@ class _SignInViewState extends ConsumerState<SignInView> {
                     flex: 0,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('You are already signed in as:'),
-                        const SizedBox(width: defaultPadding),
+                      children: const [
+                        Text('You are already signed in as:'),
+                        SizedBox(width: defaultPadding),
                         ProfileButton(),
                       ],
                     ),

@@ -30,7 +30,7 @@ class ProfileButton extends ConsumerWidget {
                       onPressed: onPressed,
                     )
                   : OutlinedButton.icon(
-                      label: Text(user.displayName ?? user.username),
+                      label: Text(user.toString()),
                       icon: const Icon(Icons.person),
                       onPressed: onPressed,
                     ),

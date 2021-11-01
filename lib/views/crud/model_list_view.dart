@@ -23,6 +23,7 @@ class ModelListView extends ConsumerWidget {
       model: 'workshop',
     );
     return PermissionGate(
+      requiredRole: 'event organizer',
       signedInBuilder: (context) => Padding(
         padding: const EdgeInsets.all(defaultPadding),
         child: Column(

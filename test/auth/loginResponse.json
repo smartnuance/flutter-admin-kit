@@ -1,0 +1,38 @@
+{
+  "accessToken": "accessDummy",
+  "refreshToken": "refreshDummy",
+  "role": "super admin",
+  "rolesSpec": [
+    {
+      "role": "super admin",
+      "inherited": [
+        "",
+        "super admin"
+      ]
+    },
+    {
+      "role": "instance admin",
+      "inherited": [
+        "",
+        "instance admin",
+        "event organizer",
+        "teacher"
+      ]
+    },
+    {
+      "role": "event organizer",
+      "inherited": [
+        "",
+        "event organizer",
+        "teacher"
+      ]
+    },
+    {
+      "role": "teacher",
+      "inherited": [
+        "",
+        "teacher"
+      ]
+    }
+  ]
+}
