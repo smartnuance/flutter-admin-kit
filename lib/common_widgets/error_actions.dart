@@ -22,65 +22,67 @@ class ErrorActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     return Center(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(defaultPadding),
-        decoration: BoxDecoration(
-          border: Border(
-            left: BorderSide(
-                color: Theme.of(context).errorColor,
-                width: 10,
-                style: BorderStyle.solid),
-            right: BorderSide(
-                color: Theme.of(context).errorColor,
-                width: 10,
-                style: BorderStyle.solid),
+      child: Card(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(defaultPadding),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                  color: Theme.of(context).errorColor,
+                  width: 5,
+                  style: BorderStyle.solid),
+              right: BorderSide(
+                  color: Theme.of(context).errorColor,
+                  width: 5,
+                  style: BorderStyle.solid),
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (error.runtimeType == NotAuthorizedException) ...[
-              const Text('You are not authorized to open this view.'),
-              const SizedBox(height: defaultPadding),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (user.asData?.value.isAnonymous ?? true)
-                    OutlinedButton(
-                      child: Text(
-                        'Sign in'.i18n,
-                        style: const TextStyle(
-                          fontSize: 18.0,
-                        ),
-                      ),
-                      onPressed: () => ref
-                          .read(viewStackProvider.notifier)
-                          .pushView(ViewId.login),
-                    ),
-                  const SizedBox(width: defaultPadding),
-                  if (onRetry != null)
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.refresh),
-                      label: const Text(
-                        'Retry',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                        ),
-                      ),
-                      onPressed: onRetry,
-                    ),
-                ],
-              )
-            ] else if (error.runtimeType == PermissionException) ...[
-              const Text('You do not have permission to open this view.'),
-              if (widget != null) ...[
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (error.runtimeType == NotAuthorizedException) ...[
+                const Text('You are not authorized to open this view.'),
                 const SizedBox(height: defaultPadding),
-                widget!
-              ]
-            ] else
-              Text(error.toString()),
-          ],
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (user.asData?.value.isAnonymous ?? true)
+                      OutlinedButton(
+                        child: Text(
+                          'Sign in'.i18n,
+                          style: const TextStyle(
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        onPressed: () => ref
+                            .read(viewStackProvider.notifier)
+                            .pushView(ViewId.login),
+                      ),
+                    const SizedBox(width: defaultPadding),
+                    if (onRetry != null)
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.refresh),
+                        label: const Text(
+                          'Retry',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        onPressed: onRetry,
+                      ),
+                  ],
+                )
+              ] else if (error.runtimeType == PermissionException) ...[
+                const Text('You do not have permission to open this view.'),
+                if (widget != null) ...[
+                  const SizedBox(height: defaultPadding),
+                  widget!
+                ]
+              ] else
+                Text(error.toString()),
+            ],
+          ),
         ),
       ),
     );
