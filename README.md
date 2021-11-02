@@ -2,6 +2,8 @@
 
 A generative, customized admin for all platforms. Nice to use and nice to extend.
 
+Check out the [demo](https://admin-kit.smartnuance.com).
+
 Learn more in the [introductory blog post & videos](https://smartnuance.com/blog/flutter-admin-kit/).
 
 ## A note on the backend
