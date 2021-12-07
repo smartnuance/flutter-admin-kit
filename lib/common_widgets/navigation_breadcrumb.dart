@@ -13,7 +13,7 @@ class NavigationBreadcrumb extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final views = ref.watch(viewStackProvider);
-    final mainView = ref.watch(mainViewProvider).state;
+    final mainView = ref.watch(mainViewProvider);
     return BreadCrumb(
       items: views.map(
         (stackView) {

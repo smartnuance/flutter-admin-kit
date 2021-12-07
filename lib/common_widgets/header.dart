@@ -29,7 +29,7 @@ class Header extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final title = ref.watch(titleProvider).state;
+    final title = ref.watch(titleProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(

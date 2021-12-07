@@ -27,8 +27,8 @@ class SharedScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<AsyncValue<Message>>(
       snackStreamProvider,
-      (state) {
-        state.whenData(
+      (_, next) {
+        next.whenData(
           (m) => ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               duration: const Duration(seconds: 3),

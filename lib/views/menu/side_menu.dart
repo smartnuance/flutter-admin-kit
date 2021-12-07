@@ -7,7 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class SideMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entries = ref.watch(menuEntriesProvider).state;
+    final entries = ref.watch(menuEntriesProvider);
     final mainView = ref.watch(mainViewProvider);
     return Drawer(
       child: SingleChildScrollView(
@@ -25,7 +25,7 @@ class SideMenu extends ConsumerWidget {
                       context,
                       ref,
                       entry,
-                      selected: mainView.state?.maybeWhen(
+                      selected: mainView?.maybeWhen(
                             loaded: (path, view) => entry.viewId == view.id,
                             orElse: () => false,
                           ) ??
@@ -39,7 +39,7 @@ class SideMenu extends ConsumerWidget {
                                 context,
                                 ref,
                                 item,
-                                selected: mainView.state?.maybeWhen(
+                                selected: mainView?.maybeWhen(
                                       loaded: (path, view) =>
                                           item.viewId == view.id,
                                       orElse: () => false,

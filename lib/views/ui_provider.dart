@@ -52,7 +52,7 @@ final showDebugPanelProvider = StateProvider<bool>((ref) => true);
 /// Provides a global [ViewRouterDelegate].
 ///
 /// By defining the router delegate as a riverpod provider allows to parameterize it
-/// with a [ProviderRefBase]. The reference can then be used to get access to
+/// with a [ProviderRef]. The reference can then be used to get access to
 /// the fresh global state that keeps track of desired route changes
 /// triggered from anywhere in the app:
 ///
@@ -97,7 +97,7 @@ final mainViewProvider = StateProvider<RoutedView?>((ref) {
   final mainView = viewStack.last;
   storeLastOpenView(mainView.id);
 
-  final notFoundPath = ref.watch(notFoundPathProvider).state;
+  final notFoundPath = ref.watch(notFoundPathProvider);
   if (notFoundPath != null) {
     return RoutedView.notFound(path: notFoundPath);
   }
@@ -108,7 +108,7 @@ final mainViewProvider = StateProvider<RoutedView?>((ref) {
 final titleProvider = StateProvider<String>((ref) {
   final mainView = ref.watch(mainViewProvider);
 
-  return mainView.state?.map(
+  return mainView?.map(
         resolved: (view) => 'View Not loaded',
         loaded: (view) => view.view.title,
         notFound: (view) => 'Not found',
@@ -156,7 +156,7 @@ class ViewStackState extends StateNotifier<List<View>> {
         super([]);
 
   final UI? ui;
-  late final ProviderRefBase ref;
+  late final StateNotifierProviderRef<ViewStackState, List<View>> ref;
 
   static Iterable<ViewId> _canonical(ViewId viewId) {
     Iterable<ViewId> _buildViewStack() sync* {
@@ -204,17 +204,17 @@ class ViewStackState extends StateNotifier<List<View>> {
     modifiedStack = state.where((view) => view.id != id);
     state = [...modifiedStack, pushedView];
 
-    ref.read(notFoundPathProvider).state = null;
+    ref.read(notFoundPathProvider.state).state = null;
   }
 
   bool canPop() {
-    return state.length > 1 || ref.read(notFoundPathProvider).state != null;
+    return state.length > 1 || ref.read(notFoundPathProvider) != null;
   }
 
   bool pop() {
     // first check if there is a not found view
-    if (ref.read(notFoundPathProvider).state != null) {
-      ref.read(notFoundPathProvider).state = null;
+    if (ref.read(notFoundPathProvider) != null) {
+      ref.read(notFoundPathProvider.state).state = null;
       return true;
     }
 
@@ -222,7 +222,7 @@ class ViewStackState extends StateNotifier<List<View>> {
       return false;
     }
     state = state.sublist(0, state.length - 1);
-    ref.read(notFoundPathProvider).state = null;
+    ref.read(notFoundPathProvider.state).state = null;
     return true;
   }
 
@@ -233,7 +233,7 @@ class ViewStackState extends StateNotifier<List<View>> {
   void switchView(ViewId id) {
     developer.log('switch view to $id');
     state = _canonicalStack(ui, id);
-    ref.read(notFoundPathProvider).state = null;
+    ref.read(notFoundPathProvider.state).state = null;
   }
 }
 
@@ -267,7 +267,7 @@ final uiConfigSourceProvider =
 ///
 /// The config is read from the configured source, see [uiConfigSourceProvider].
 final uiProvider = FutureProvider<UI>((ref) async {
-  final configSource = ref.watch(uiConfigSourceProvider).state;
+  final configSource = ref.watch(uiConfigSourceProvider);
   final UI ui;
   switch (configSource) {
     case ConfigSource.file:

@@ -7,6 +7,7 @@ import 'package:admin/views/auth/auth.dart';
 import 'package:admin/views/crud/api_provider.dart';
 import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart';
 import 'package:http_interceptor/http/http.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 import 'package:i18n_extension/default.i18n.dart';
@@ -26,8 +27,8 @@ final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
   (ref) {
     final user = ref.watch(loadedUser).when(
           data: (user) => AsyncValue<User>.data(user),
-          loading: (_) => const AsyncValue<User>.loading(),
-          error: (error, stackTrace, _) =>
+          loading: () => const AsyncValue<User>.loading(),
+          error: (error, stackTrace) =>
               AsyncValue<User>.error(error, stackTrace: stackTrace),
         );
     return Auth(ref, user);
@@ -52,7 +53,7 @@ final tokensProvider = Provider<TokenPair?>(
 class Auth extends StateNotifier<AsyncValue<User>> {
   Auth(this.ref, AsyncValue<User> user) : super(user);
 
-  final ProviderRefBase ref;
+  final StateNotifierProviderRef<Auth, AsyncValue<User>> ref;
 
   Future<void> signInWithCredential(
       {required String username, required String password}) async {
@@ -79,8 +80,8 @@ class Auth extends StateNotifier<AsyncValue<User>> {
                 .read(messagesProvider.notifier)
                 .info(text: 'Successfully logged in as $user');
           },
-          loading: (_) => {},
-          error: (error, stackTrace, _) {
+          loading: () => {},
+          error: (error, stackTrace) {
             ref.read(messagesProvider.notifier).error(
                   text: 'Error logging in $username',
                   error: error,
@@ -90,10 +91,10 @@ class Auth extends StateNotifier<AsyncValue<User>> {
         );
         return updated;
       },
-      loading: (_) {
+      loading: () {
         return state;
       },
-      error: (error, stackTrace, _) {
+      error: (error, stackTrace) {
         ref.read(messagesProvider.notifier).error(
               text:
                   'Cannot login as long as error present: ${error.toString()}',
@@ -120,13 +121,12 @@ class Auth extends StateNotifier<AsyncValue<User>> {
           state = AsyncValue.data(user.copyWith(tokens: newTokens));
         });
       },
-      loading: (_) => {},
-      error: (error, stackTrace, _) =>
-          ref.read(messagesProvider.notifier).error(
-                text: error.toString(),
-                error: error,
-                stackTrace: stackTrace,
-              ),
+      loading: () => {},
+      error: (error, stackTrace) => ref.read(messagesProvider.notifier).error(
+            text: error.toString(),
+            error: error,
+            stackTrace: stackTrace,
+          ),
     );
   }
 
@@ -176,7 +176,7 @@ class Auth extends StateNotifier<AsyncValue<User>> {
 class AuthInterceptor implements InterceptorContract {
   AuthInterceptor(this.ref);
 
-  final ProviderRefBase ref;
+  final StateProviderRef<Client> ref;
 
   @override
   Future<RequestData> interceptRequest({required RequestData data}) async {
@@ -205,7 +205,7 @@ class AuthInterceptor implements InterceptorContract {
 class ExpiredTokenRetryPolicy extends RetryPolicy {
   ExpiredTokenRetryPolicy(this.ref);
 
-  final ProviderRefBase ref;
+  final StateProviderRef<Client> ref;
 
   @override
   Future<bool> shouldAttemptRetryOnResponse(ResponseData response) async {

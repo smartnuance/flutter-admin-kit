@@ -32,9 +32,9 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   google_fonts: ^2.1.0
-  flutter_svg: ^0.22.0
+  flutter_svg: ^1.0.0
   fl_chart: ^0.40.0
-  flutter_riverpod: ^1.0.0-dev.10
+  flutter_riverpod: ^1.0.2
   url_strategy: ^0.2.0
   universal_platform: ^1.0.0-nullsafety
   flutter_breadcrumb: ^1.0.1
@@ -46,13 +46,13 @@ dependencies:
   i18n_extension: ^4.1.3
   shared_preferences: ^2.0.8
   timeline_tile: ^2.0.0
-  freezed_annotation: ^0.14.3
+  freezed_annotation: ^1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.0.5
-  freezed: ^0.14.2
+  freezed: ^1.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

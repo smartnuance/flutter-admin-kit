@@ -22,7 +22,7 @@ class DebugPanel extends ConsumerWidget {
     final accessToken = ref.watch(tokensProvider)?.access ?? '';
     final refreshToken = ref.watch(tokensProvider)?.refresh ?? '';
     final viewStack = ref.watch(viewStackProvider);
-    final notFoundPath = ref.watch(notFoundPathProvider).state;
+    final notFoundPath = ref.watch(notFoundPathProvider);
 
     return PhysicalModel(
       color: Colors.white,
@@ -54,8 +54,8 @@ class DebugPanel extends ConsumerWidget {
                     child: user.when(
                       data: (user) =>
                           _buildCopyableText('User:', user.toString()),
-                      loading: (_) => const LinearProgressIndicator(),
-                      error: (error, stackTrace, _) =>
+                      loading: () => const LinearProgressIndicator(),
+                      error: (error, stackTrace) =>
                           _buildCopyableText('Error:', error.toString()),
                     ),
                   ),

@@ -35,8 +35,8 @@ class ProfileButton extends ConsumerWidget {
                       onPressed: onPressed,
                     ),
             ),
-      loading: (_) => const CircularProgressIndicator(strokeWidth: 2),
-      error: (error, stackTrace, _) =>
+      loading: () => const CircularProgressIndicator(strokeWidth: 2),
+      error: (error, stackTrace) =>
           const IconButton(icon: Icon(Icons.person_outline), onPressed: null),
     );
   }

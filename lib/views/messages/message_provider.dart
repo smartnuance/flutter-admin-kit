@@ -8,6 +8,7 @@ final _snackStreamControllerProvider =
   final streamController = StreamController<Message>();
   ref.onDispose(() {
     // Closes the StreamController when the state of this provider is destroyed.
+    // (see https://riverpod.dev/docs/concepts/providers/#performing-actions-before-the-state-destruction)
     streamController.close();
   });
 
@@ -18,7 +19,13 @@ final _snackStreamControllerProvider =
 final snackStreamProvider = StreamProvider.autoDispose<Message>((ref) {
   final controller = ref.watch(_snackStreamControllerProvider);
 
-  return controller.state.stream;
+  ref.onDispose(() {
+    // Closes the StreamController when the state of this provider is destroyed.
+    // (see https://riverpod.dev/docs/concepts/providers/#performing-actions-before-the-state-destruction)
+    controller.close();
+  });
+
+  return controller.stream;
 });
 
 final messagesProvider =
@@ -29,12 +36,12 @@ final messagesProvider =
 class MessagesState extends StateNotifier<MessageList> {
   MessagesState(this.ref) : super(MessageList(List.empty()));
 
-  late final ProviderRefBase ref;
+  late final StateNotifierProviderRef<MessagesState, MessageList> ref;
 
   void publish(Message m) {
     state = state.copyWith(items: [...state.items, m]);
     if (m.showSnack) {
-      ref.read(_snackStreamControllerProvider).state.sink.add(m);
+      ref.read(_snackStreamControllerProvider).sink.add(m);
     }
   }
 

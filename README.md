@@ -23,6 +23,24 @@ Authentication with OAuth based on auto-refreshed JWTs:
 
 Debug panel for live inspection of global state
 
+## Get started
+
+Because of [a bug](https://github.com/rrousselGit/river_pod/issues/880) in Dart for _flutter stable channel_ we need to use the master channel for now:
+
+> flutter channel master
+
+> flutter upgrade
+
+> flutter packages pub global activate webdev
+
+To run the admin from terminal
+
+> flutter run -d chrome
+
+With a different backend URL and hash routing activated:
+
+> flutter run --dart-define="HASH_ROUTER=true" --dart-define="BACKEND_URL=true" -d chrome
+
 ## Packages used
 
 State management

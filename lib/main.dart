@@ -52,7 +52,7 @@ class AdminApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ViewRouterDelegate delegate = ref.watch(routerDelegateProvider);
-    final title = ref.watch(titleProvider).state;
+    final title = ref.watch(titleProvider);
 
     final swatch = createMaterialColor(
       // CI primary color
@@ -212,13 +212,12 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
   ViewRouterDelegate(
     this.ref,
   ) {
-    // ignore: avoid_types_on_closure_parameters
-    ref.listen(mainViewProvider, (StateController<RoutedView?> sc) {
-      mainView = sc.state;
+    ref.listen<RoutedView?>(mainViewProvider, (_, next) {
+      mainView = next;
     });
   }
 
-  late final ProviderRefBase ref;
+  late final ProviderRef ref;
   Map<VoidCallback, VoidCallback> listenerToProviderSubscriptions = {};
   RoutedView? mainView;
 
@@ -246,14 +245,14 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
         if (view != null) {
           ref.read(viewStackProvider.notifier).switchView(view.id);
         } else if (path.isNotEmpty) {
-          ref.read(notFoundPathProvider).state = path;
+          ref.read(notFoundPathProvider.state).state = path;
         } else {
           // leave the decision which route to navigate next to the UI
         }
       },
       notFound: (path) {
         if (path.isNotEmpty) {
-          ref.read(notFoundPathProvider).state = path;
+          ref.read(notFoundPathProvider.state).state = path;
         } else {
           // leave the decision which route to navigate next to the UI
         }
@@ -275,7 +274,7 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
     if (!listenerToProviderSubscriptions.containsKey(listener)) {
       listenerToProviderSubscriptions.putIfAbsent(
           listener,
-          () => ref.listen(mainViewProvider, (_) {
+          () => ref.listen<RoutedView?>(mainViewProvider, (_, __) {
                 listener();
               }));
     }
@@ -298,7 +297,7 @@ class URLNavigator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final viewStack = ref.watch(viewStackProvider);
-    final notFoundPath = ref.watch(notFoundPathProvider).state;
+    final notFoundPath = ref.watch(notFoundPathProvider);
 
     final pages = viewStack.isNotEmpty
         ? viewStack.map((view) => _mapViewToPage(context, view, ref)).toList()

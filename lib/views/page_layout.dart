@@ -14,7 +14,7 @@ class PageLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showDebugPanel = ref.watch(showDebugPanelProvider).state;
+    final showDebugPanel = ref.watch(showDebugPanelProvider);
 
     final mainContainer = Column(
       children: [const Header(), Flexible(child: child)],

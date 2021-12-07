@@ -50,7 +50,8 @@ class ModelItemsNotifier extends StateNotifier<InfiniteList> {
   ModelItemsNotifier(this.ref, this.apiService, this.meta, InfiniteList state)
       : super(state);
 
-  final ProviderRefBase ref;
+  final AutoDisposeStateNotifierProviderRef<ModelItemsNotifier, InfiniteList>
+      ref;
   final APIService apiService;
   final ModelMeta meta;
 

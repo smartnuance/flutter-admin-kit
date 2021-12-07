@@ -64,10 +64,10 @@ class _SignInViewState extends ConsumerState<SignInView> {
                       ],
                     ),
                   ),
-            loading: (_) => const ProgressStatus(
+            loading: () => const ProgressStatus(
               message: 'Loading user info',
             ),
-            error: (error, _, __) => ErrorActions(error),
+            error: (error, _) => ErrorActions(error),
           ),
           const SizedBox(height: defaultPadding),
           Flexible(
