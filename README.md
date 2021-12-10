@@ -19,7 +19,7 @@ Model list view dynamically generated from config files and an inspection API:
 ![Model list view](model-list-view.png)
 
 Authentication with OAuth based on auto-refreshed JWTs:
-![Dashbaord](login-view.png)
+![Dashboard](login-view.png)
 
 Debug panel for live inspection of global state
 
