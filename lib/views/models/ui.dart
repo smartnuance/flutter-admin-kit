@@ -4,7 +4,7 @@ import 'package:admin/views/menu/menu_model.dart';
 import 'package:admin/views/models/layout.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'ui_model.freezed.dart';
+part 'ui.freezed.dart';
 
 enum ConfigSource { file, api, fallback }
 

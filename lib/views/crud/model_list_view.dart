@@ -4,7 +4,7 @@ import 'package:admin/views/auth/permission_gate.dart';
 import 'package:admin/views/crud/model_list.dart';
 import 'package:admin/views/crud/model_provider.dart';
 import 'package:admin/views/crud/models/model_infos.dart';
-import 'package:admin/views/ui_model.dart';
+import 'package:admin/views/models/ui.dart';
 import 'package:admin/views/ui_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

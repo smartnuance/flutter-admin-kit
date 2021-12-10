@@ -1,4 +1,4 @@
-import 'package:admin/views/ui_model.dart';
+import 'package:admin/views/models/ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'menu_model.freezed.dart';

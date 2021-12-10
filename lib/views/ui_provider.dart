@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 
 import 'package:admin/main.dart';
 import 'package:admin/views/menu/menu_model.dart';
-import 'package:admin/views/ui_model.dart';
+import 'package:admin/views/models/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
