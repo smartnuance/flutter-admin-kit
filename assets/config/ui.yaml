@@ -7,6 +7,15 @@ views:
       title: All Events
       svgSrc: assets/icons/menu_doc.svg
       group: event-system
+    layouts:
+      defaultList:
+        type: modelList
+        fieldCombos:
+          - "state"
+          - "title\nslug"
+          - "starts"
+          - "ends"
+          - "[locationName](locationURL)"
   - id:
       id: events
       type: modelCreate

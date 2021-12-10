@@ -138,7 +138,12 @@ MaterialPage _buildAuxiliaryPage(Widget child) {
 MaterialPage _buildPage(View view, Widget child) {
   return MaterialPage(
     key: ObjectKey(view),
-    child: PageLayout(child: child),
+    child: ProviderScope(
+      child: PageLayout(child: child),
+      overrides: [
+        pageViewProvider.overrideWithValue(StateController(view)),
+      ],
+    ),
   );
 }
 

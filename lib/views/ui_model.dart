@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:admin/views/menu/menu_model.dart';
+import 'package:admin/views/models/layout.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'ui_model.freezed.dart';
@@ -155,7 +156,9 @@ class RoutedView with _$RoutedView {
 @freezed
 class ViewId with _$ViewId {
   factory ViewId.custom(String id) = Custom;
+
   factory ViewId.modelList(String id) = ModelList;
+
   factory ViewId.modelCreate(String id) = ModelCreate;
 
   ViewId._();
@@ -195,8 +198,12 @@ class ViewId with _$ViewId {
 
 @freezed
 class View with _$View {
-  factory View(
-      {required ViewId id, required String title, MenuItem? menuItem}) = _View;
+  factory View({
+    required ViewId id,
+    required String title,
+    MenuItem? menuItem,
+    @Default({}) Map<String, Layout> layouts,
+  }) = _View;
 
   View._();
 
@@ -208,10 +215,14 @@ class View with _$View {
     if (viewId == null) {
       throw StateError('missing id for View');
     }
+    final layoutsData = data['layouts'] as Map<String, dynamic>? ?? {};
+    final layouts = layoutsData.map((layoutName, dynamic m) =>
+        MapEntry(layoutName, Layout.fromMap(m as Map<String, dynamic>?)));
     return View(
       id: ViewId.fromMap(viewId),
       title: data['title'] as String,
       menuItem: MenuItem.fromMap(data['menuItem']),
+      layouts: layouts,
     );
   }
 

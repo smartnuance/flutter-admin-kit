@@ -8,6 +8,7 @@ abstract class StringValidator {
 
 class RegexValidator implements StringValidator {
   RegexValidator({required this.regexSource});
+
   final String regexSource;
 
   @override
@@ -32,6 +33,7 @@ class RegexValidator implements StringValidator {
 
 class ValidatorInputFormatter implements TextInputFormatter {
   ValidatorInputFormatter({required this.editingValidator});
+
   final StringValidator editingValidator;
 
   @override
@@ -55,10 +57,21 @@ class NonEmptyStringValidator extends StringValidator {
 
 class MinLengthStringValidator extends StringValidator {
   MinLengthStringValidator(this.minLength);
+
   final int minLength;
 
   @override
   bool isValid(String value) {
     return value.length >= minLength;
   }
+}
+
+bool isWebURL(String? string, {bool allowHTTP = false}) {
+  if (string == null) {
+    return false;
+  }
+  final uri = Uri.tryParse(string);
+  return uri != null &&
+      uri.hasAbsolutePath &&
+      uri.scheme.startsWith(allowHTTP ? 'http' : 'https');
 }
