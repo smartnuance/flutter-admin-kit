@@ -219,35 +219,39 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
   DataColumn _buildColumnHeader(ModelSpec spec, ModelMeta meta, Combo combo) {
     final List<Widget> lines = [];
     for (final line in combo.lines) {
-      final List<Widget> tokens = [];
-      for (final token in line.tokens) {
-        tokens.add(token.when(string: (id) {
-          final label = spec.infos[meta]!.fieldInfos[id]?.label;
-          if (label?.isNotEmpty ?? false) {
-            return Text(label!);
-          } else {
-            return Text(
-              id,
-              style: GoogleFonts.robotoMono(
-                color: Colors.red,
-              ),
-            );
-          }
-        }, link: (labelFieldID, hrefFieldID) {
-          final label = spec.infos[meta]!.fieldInfos[labelFieldID]?.label;
-          if (label?.isNotEmpty ?? false) {
-            return Text(label!);
-          } else {
-            return Text(
-              labelFieldID,
-              style: GoogleFonts.robotoMono(
-                color: Colors.red,
-              ),
-            );
-          }
-        }));
-      }
-      lines.add(tokens.length > 1 ? Row(children: tokens) : tokens.first);
+      final tokens = line.tokens.map(
+        (token) => token.when(
+          string: (id) {
+            final label = spec.infos[meta]!.fieldInfos[id]?.label;
+            if (label?.isNotEmpty ?? false) {
+              return Text(label!);
+            } else {
+              return Text(
+                id,
+                style: GoogleFonts.robotoMono(
+                  color: Colors.red,
+                ),
+              );
+            }
+          },
+          link: (labelFieldID, hrefFieldID) {
+            final label = spec.infos[meta]!.fieldInfos[labelFieldID]?.label;
+            if (label?.isNotEmpty ?? false) {
+              return Text(label!);
+            } else {
+              return Text(
+                labelFieldID,
+                style: GoogleFonts.robotoMono(
+                  color: Colors.red,
+                ),
+              );
+            }
+          },
+        ),
+      );
+      lines.add(tokens.length > 1
+          ? Row(children: tokens.toList(growable: false))
+          : tokens.first);
     }
 
     return DataColumn(
@@ -294,34 +298,44 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
       BuildContext context, Combo combo, ModelItem instance, WidgetRef ref) {
     final List<Widget> lines = [];
     for (final line in combo.lines) {
-      final List<Widget> tokens = [];
-      for (final token in line.tokens) {
-        token.when(string: (id) {
-          tokens.add(_buildValue(context, instance.fields[id]));
-        }, link: (labelFieldID, hrefFieldID) {
-          final hrefField = instance.fields[hrefFieldID];
-          final href = (hrefField is StringValue) ? hrefField.value : null;
-          tokens.add(TextButton(
-            onPressed: isWebURL(href)
-                ? () async {
-                    if (!await launch(href!)) {
-                      ref.read(messagesProvider.notifier).error(
-                            text: 'Error opening URL',
-                          );
+      final tokens = line.tokens.map(
+        (token) => token.when(
+          string: (id) {
+            return _buildValue(context, instance.fields[id], id: id);
+          },
+          link: (labelFieldID, hrefFieldID) {
+            final hrefField = instance.fields[hrefFieldID];
+            final href = (hrefField is StringValue) ? hrefField.value : null;
+            return TextButton(
+              onPressed: isWebURL(href)
+                  ? () async {
+                      if (!await launch(href!)) {
+                        ref.read(messagesProvider.notifier).error(
+                              text: 'Error opening URL',
+                            );
+                      }
                     }
-                  }
-                : null,
-            child: _buildValue(context, instance.fields[labelFieldID]),
-          ));
-        });
-      }
-      lines.add(tokens.length > 1 ? Row(children: tokens) : tokens.first);
+                  : null,
+              child: _buildValue(context, instance.fields[labelFieldID]),
+            );
+          },
+        ),
+      );
+      lines.add(tokens.length > 1
+          ? Row(children: tokens.toList(growable: false))
+          : tokens.first);
     }
 
-    return DataCell(lines.length > 1 ? Column(children: lines) : lines.first);
+    return DataCell(lines.length > 1
+        ? Column(
+            children: lines,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+          )
+        : lines.first);
   }
 
-  Widget _buildValue(BuildContext context, FieldValue? fieldValue) {
+  Widget _buildValue(BuildContext context, FieldValue? fieldValue,
+      {String? id}) {
     if (fieldValue == null) {
       return const Text('');
     }
