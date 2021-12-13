@@ -6,9 +6,11 @@ A generative, customized admin for all platforms. Nice to use and nice to extend
 
 [demo](https://admin-kit.smartnuance.com) | [introductory blog post & videos](https://smartnuance.com/blog/flutter-admin-kit/)
 
+
 ## A note on the backend
 
 This project is integrated with a [compatible microservice backend built with Go](https://github.com/smartnuance/saas-kit). Since this frontend uses REST APIs, it can be used with any backend providing the necessary endpoints for authentication, UI configuration and depending on those, CRUD operations.
+
 
 ## Feature highlights
 
@@ -22,6 +24,7 @@ Authentication with OAuth based on auto-refreshed JWTs:
 ![Dashboard](login-view.png)
 
 Debug panel for live inspection of global state
+
 
 ## Get started
 
@@ -40,6 +43,7 @@ To run the admin from terminal
 With a different backend URL and hash routing activated:
 
 > flutter run --dart-define="HASH_ROUTER=true" --dart-define="BACKEND_URL=true" -d chrome
+
 
 ## Packages used
 
@@ -72,9 +76,10 @@ Asset handling:
 - [google_fonts](https://pub.dev/packages/google_fonts)
 
 
-**Fonts**
+### Fonts
 
 - [Poppin](https://fonts.google.com/specimen/Poppins)
+
 
 ## Credits
 
