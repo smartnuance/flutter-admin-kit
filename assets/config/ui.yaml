@@ -2,9 +2,9 @@ views:
   - id:
       id: events
       type: modelList
-    title: Events
+    title: Workshops
     menuItem:
-      title: All Events
+      title: All Workshops
       svgSrc: assets/icons/menu_doc.svg
       group: event-system
     layouts:
@@ -21,9 +21,9 @@ views:
   - id:
       id: events
       type: modelCreate
-    title: Create a new event
+    title: Create a new workshop
     menuItem:
-      title: Create Event
+      title: Create Workshop
       svgSrc: assets/icons/menu_doc.svg
       group: event-system
 menuGroups:
