@@ -99,6 +99,35 @@ class ModelItemsNotifier extends StateNotifier<InfiniteList> {
     );
   }
 
+  Future<void> delete(Set<String> ids) async {
+    await state.maybeWhen(
+      loaded: (modelSpec, oldItems) async {
+        state = InfiniteList.loading(modelSpec: modelSpec);
+        try {
+          await apiService.deleteItems(meta, ids);
+          state = InfiniteList.loaded(
+            modelSpec: modelSpec,
+            modelItems: oldItems.copyWith(
+                items: oldItems.items
+                    .where(
+                      (element) =>
+                          !ids.contains((element.id as StringValue).value),
+                    )
+                    .toList(growable: false)),
+          );
+        } catch (error, stackTrace) {
+          ref.read(messagesProvider.notifier).error(
+                text: 'Error deleting model instances.',
+                error: error,
+                stackTrace: stackTrace,
+              );
+          state = InfiniteList.error(error, stackTrace);
+        }
+      },
+      orElse: () {},
+    );
+  }
+
   Future<void> extend() async {
     await state.maybeWhen(
       notLoaded: () {

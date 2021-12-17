@@ -12,7 +12,9 @@ views:
         type: modelList
         fieldCombos:
           - "state"
-          - "title\nslug"
+          - |
+            title
+            slug
           - "starts"
           - "ends"
           - "[locationName](locationURL)"

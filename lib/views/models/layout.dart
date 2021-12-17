@@ -44,6 +44,7 @@ class Combo with _$Combo {
     return Combo(
       lines: data
           .split('\n')
+          .where((line) => line.isNotEmpty)
           .map((line) => Line.fromString(line))
           .toList(growable: false),
     );

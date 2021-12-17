@@ -1,5 +1,6 @@
 import 'package:admin/common_widgets/error_actions.dart';
 import 'package:admin/common_widgets/progress_status.dart';
+import 'package:admin/constants.dart';
 import 'package:admin/utils/string_validators.dart';
 import 'package:admin/views/crud/model_provider.dart';
 import 'package:admin/views/crud/models/model_infos.dart';
@@ -27,7 +28,7 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
   final _scrollController = ScrollController();
   final _scrollControllerHorizontal = ScrollController();
   final FocusNode _focusNode = FocusNode();
-  final Set<int> selected = {};
+  final Set<String> selected = {};
   bool multiSelectMode = false;
 
   @override
@@ -68,15 +69,14 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
               spec,
               meta,
               modelItemsNotifier,
-              footer: modelItems.paging.next != null
-                  ? Align(
-                      alignment: Alignment.topCenter,
-                      child: OutlinedButton(
-                        child: Text('Load more'.i18n),
-                        onPressed: () => {modelItemsNotifier.extend()},
-                      ),
-                    )
-                  : null,
+              footer: _buildFooter(
+                modelItems,
+                modelItemsNotifier,
+                showDelete: selected.isNotEmpty,
+                onMultiSelect: () => setState(() {
+                  multiSelectMode = true;
+                }),
+              ),
             ),
             reloading: (_, modelItems) => _buildTable(
               view,
@@ -109,6 +109,72 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
           onRetry: () => ref.refresh(modelSpecProvider(meta)),
         );
       },
+    );
+  }
+
+  Widget? _buildFooter(
+    ModelItems modelItems,
+    ModelItemsNotifier modelItemsNotifier, {
+    bool showDelete = false,
+    VoidCallback? onMultiSelect,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            width: 1.0,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.all(defaultPadding),
+      child: Row(
+        children: [
+          if (onMultiSelect != null)
+            // OutlinedButton(
+            //   onPressed: onMultiSelect,
+            //   child: const Icon(
+            //     Icons.check_box,
+            //     size: 20,
+            //   ),
+            //   style: ButtonStyle(
+            //     shape: MaterialStateProperty.all(const CircleBorder()),
+            //   ),
+            // ),
+            ElevatedButton.icon(
+              onPressed: onMultiSelect,
+              icon: const Icon(Icons.check_box),
+              label: const Text('multi edit'),
+            ),
+          if (showDelete)
+            OutlinedButton(
+              onPressed: selected.isNotEmpty
+                  ? () {
+                      modelItemsNotifier.delete(selected);
+                    }
+                  : null,
+              child: const Icon(
+                Icons.delete,
+                size: 20,
+              ),
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all(const CircleBorder()),
+                foregroundColor:
+                    MaterialStateProperty.resolveWith<Color?>((states) {
+                  if (states.contains(MaterialState.pressed)) {
+                    return Colors.redAccent;
+                  } // <-- Splash color
+                }),
+              ),
+            ),
+          const Spacer(),
+          if (modelItems.paging.next != null)
+            OutlinedButton(
+              child: Text('Load more'.i18n),
+              onPressed: () => {modelItemsNotifier.extend()},
+            ),
+        ],
+      ),
     );
   }
 
@@ -263,24 +329,24 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
 
   DataRow _buildRow(BuildContext context, List<Combo> fieldCombos,
       ModelItem instance, WidgetRef ref) {
-    final dynamic idHashCode = instance.id?.value.hashCode;
+    final dynamic id = (instance.id as StringValue).value;
 
     return DataRow(
       cells: fieldCombos
           .map<DataCell>((combo) => _buildCell(context, combo, instance, ref))
           .toList(growable: false),
-      selected: selected.contains(idHashCode),
+      selected: selected.contains(id),
       onSelectChanged: multiSelectMode
-          ? idHashCode != null
+          ? id != null
               ? (value) {
                   setState(() {
-                    if (idHashCode == null) {
+                    if (id == null) {
                       return;
                     }
                     if (value ?? false) {
-                      selected.add(idHashCode);
+                      selected.add(id);
                     } else {
-                      selected.remove(idHashCode);
+                      selected.remove(id);
                       if (selected.isEmpty) {
                         setState(() {
                           multiSelectMode = false;

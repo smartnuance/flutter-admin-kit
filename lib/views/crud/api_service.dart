@@ -60,6 +60,27 @@ class APIService {
             'Failed with status code ${response.statusCode} to retrieve model list from $url');
     }
   }
+
+  Future<void> deleteItems(ModelMeta meta, Set<String> ids) async {
+    for (final id in ids) {
+      final url = baseURI.resolve(p.join(meta.service, meta.model, id));
+      final response = await tokenClient.delete(
+        url,
+        headers: _headers(),
+      );
+      switch (response.statusCode) {
+        case HttpStatus.ok:
+          continue;
+        case HttpStatus.unauthorized:
+          throw NotAuthorizedException();
+        case HttpStatus.forbidden:
+          throw PermissionException();
+        default:
+          throw Exception(
+              'Failed with status code ${response.statusCode} to retrieve model list from $url');
+      }
+    }
+  }
 }
 
 class NotAuthorizedException implements Exception {}
