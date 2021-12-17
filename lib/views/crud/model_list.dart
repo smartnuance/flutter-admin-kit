@@ -73,8 +73,9 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
                 modelItems,
                 modelItemsNotifier,
                 showDelete: selected.isNotEmpty,
+                multiSelectMode: multiSelectMode,
                 onMultiSelect: () => setState(() {
-                  multiSelectMode = true;
+                  multiSelectMode = !multiSelectMode;
                 }),
               ),
             ),
@@ -116,6 +117,7 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
     ModelItems modelItems,
     ModelItemsNotifier modelItemsNotifier, {
     bool showDelete = false,
+    bool multiSelectMode = false,
     VoidCallback? onMultiSelect,
   }) {
     return Container(
@@ -131,19 +133,10 @@ class _ModelObjectListState extends ConsumerState<ModelObjectList> {
       child: Row(
         children: [
           if (onMultiSelect != null)
-            // OutlinedButton(
-            //   onPressed: onMultiSelect,
-            //   child: const Icon(
-            //     Icons.check_box,
-            //     size: 20,
-            //   ),
-            //   style: ButtonStyle(
-            //     shape: MaterialStateProperty.all(const CircleBorder()),
-            //   ),
-            // ),
-            ElevatedButton.icon(
+            OutlinedButton.icon(
               onPressed: onMultiSelect,
-              icon: const Icon(Icons.check_box),
+              icon: Icon(
+                  multiSelectMode ? Icons.check_box : Icons.check_box_outlined),
               label: const Text('multi edit'),
             ),
           if (showDelete)
