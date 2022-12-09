@@ -13,7 +13,6 @@ import 'package:admin/views/not_found_view.dart';
 import 'package:admin/views/page_layout.dart';
 import 'package:admin/views/shared_scaffold.dart';
 import 'package:admin/views/ui_provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -141,7 +140,7 @@ MaterialPage _buildPage(View view, Widget child) {
     child: ProviderScope(
       child: PageLayout(child: child),
       overrides: [
-        pageViewProvider.overrideWithValue(StateController(view)),
+        pageViewProvider.overrideWith((_) => view),
       ],
     ),
   );
@@ -250,14 +249,14 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
         if (view != null) {
           ref.read(viewStackProvider.notifier).switchView(view.id);
         } else if (path.isNotEmpty) {
-          ref.read(notFoundPathProvider.state).state = path;
+          ref.read(notFoundPathProvider.notifier).state = path;
         } else {
           // leave the decision which route to navigate next to the UI
         }
       },
       notFound: (path) {
         if (path.isNotEmpty) {
-          ref.read(notFoundPathProvider.state).state = path;
+          ref.read(notFoundPathProvider.notifier).state = path;
         } else {
           // leave the decision which route to navigate next to the UI
         }
@@ -279,7 +278,7 @@ class ViewRouterDelegate extends RouterDelegate<RoutedView>
     if (!listenerToProviderSubscriptions.containsKey(listener)) {
       listenerToProviderSubscriptions.putIfAbsent(
           listener,
-          () => ref.listen<RoutedView?>(mainViewProvider, (_, __) {
+          () => () => ref.listen<RoutedView?>(mainViewProvider, (_, __) {
                 listener();
               }));
     }

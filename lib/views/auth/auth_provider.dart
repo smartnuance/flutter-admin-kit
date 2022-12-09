@@ -8,7 +8,6 @@ import 'package:admin/views/crud/api_provider.dart';
 import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart';
-import 'package:http_interceptor/http/http.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 import 'package:i18n_extension/default.i18n.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +28,7 @@ final userProvider = StateNotifierProvider<Auth, AsyncValue<User>>(
           data: (user) => AsyncValue<User>.data(user),
           loading: () => const AsyncValue<User>.loading(),
           error: (error, stackTrace) =>
-              AsyncValue<User>.error(error, stackTrace: stackTrace),
+              AsyncValue<User>.error(error, stackTrace),
         );
     return Auth(ref, user);
   },
@@ -101,7 +100,7 @@ class Auth extends StateNotifier<AsyncValue<User>> {
               error: error,
               stackTrace: stackTrace,
             );
-        return AsyncValue<User>.error(error);
+        return AsyncValue<User>.error(error, stackTrace);
       },
     );
   }
@@ -112,7 +111,8 @@ class Auth extends StateNotifier<AsyncValue<User>> {
         await user.mapOrNull((user) async {
           if (user.tokens == null) {
             state = AsyncValue.error(
-                StateError('refresh failed since user has no tokens yet'));
+                StateError('refresh failed since user has no tokens yet'),
+                StackTrace.current);
             return;
           }
           // do NOT set the state to loading here to avoid showing loading indicators wherever the user provider is user
