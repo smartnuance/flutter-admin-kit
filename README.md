@@ -42,7 +42,7 @@ To run the admin from terminal
 
 With a different backend URL and hash routing activated:
 
-> flutter run --dart-define="HASH_ROUTER=true" --dart-define="BACKEND_URL=true" -d chrome
+> flutter run --dart-define="HASH_ROUTER=true" --dart-define="BACKEND_URL=https://saas-kit.smartnuance.com" -d chrome
 
 
 ## Packages used
