@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option go_package = "github.com/smartnuance/saas-kit/pkg/lib/modelspec";
+
+import "google/protobuf/descriptor.proto";
+package spec;
+extend google.protobuf.MessageOptions { optional ModelInfo model = 50000; }
+extend google.protobuf.MessageOptions { optional ModelInfo model_list = 50001; }
+extend google.protobuf.FieldOptions { optional FieldInfo field = 50002; }
+extend google.protobuf.OneofOptions { optional FieldInfo choices = 50003; }
+
+message ModelInfo {
+    string name = 1;
+    string service = 2;
+    string label = 3;
+    string labelPlural = 4;
+    uint32 idField = 5;
+}
+message ModelListInfo {
+    string name = 1;
+    string service = 2;
+    string label = 3;
+}
+
+message FieldInfo {
+  string label = 1;
+  string labelPlural = 2;
+  oneof type {
+    SingleFieldInfo bool = 3;
+    SingleFieldInfo integer = 4;
+    SingleFieldInfo float = 5;
+    SingleFieldInfo datetime = 6;
+    SingleFieldInfo duration = 7;
+    SingleFieldInfo content = 9;
+    SingleFieldInfo relational = 10;
+    StringFieldInfo string = 11;
+    StringFieldInfo slug = 12;
+  }
+}
+
+message SingleFieldInfo {
+  bool required = 1;
+  bool readOnly = 2;
+}
+
+message StringFieldInfo {
+  bool required = 1;
+  bool readOnly = 2;
+  uint32 maxLength = 3;
+}
+
+message RelationalContent {
+  bool required = 1;
+  bool readOnly = 2;
+  string service = 3;
+  string model = 4;
+}

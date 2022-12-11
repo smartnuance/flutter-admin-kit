@@ -1,17 +1,43 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:admin/proto/event.pb.dart';
+import 'package:admin/proto/event.pbjson.dart';
+import 'package:admin/proto/spec.pb.dart' as $spec;
 import 'package:admin/views/crud/api_provider.dart';
 import 'package:admin/views/crud/api_service.dart';
 import 'package:admin/views/crud/models/model_infos.dart';
 import 'package:admin/views/crud/models/model_instance.dart';
 import 'package:admin/views/messages/message_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:protobuf/protobuf.dart' as $pb;
+import 'package:protoc_plugin/src/generated/descriptor.pb.dart';
 
 final modelSpecProvider =
     FutureProvider.autoDispose.family<ModelSpec, ModelMeta>((ref, meta) async {
   final apiService = ref.watch(apiServiceProvider);
   final ModelSpec modelInfo;
+
+  // see https://github.com/google/protobuf.dart/blob/master/protoc_plugin/test/descriptor_test.dart
+  // final $pb.GeneratedMessage msg = Workshop_Info();
+  final msg = Workshop();
+
+  developer.log(msg.info_.byName.keys
+      .join(', ')); // -> title, slug, locationName, locationURL, couples
+  developer.log(msg.info_.byName["couples"]?.type.toString() ??
+      "<no type>"); // -> title, slug, locationName, locationURL, couples
+  developer.log(msg.eventID);
+  final registry = $pb.ExtensionRegistry();
+  $spec.Spec.registerAllExtensions(registry);
+  final descriptor = DescriptorProto.fromBuffer(workshopDescriptor, registry);
+  final option =
+      descriptor.options.getExtension($spec.Spec.model) as $spec.ModelInfo;
+  developer.log("OPTION:::: ${option}");
+
+  final fi = descriptor.field[msg.info_.byName["id"]?.index ?? -1].options;
+  final d = fi.getExtension($spec.Spec.field_50002) as $spec.FieldInfo;
+  developer.log("OPTION FIELD:::: ${d}");
+
   try {
     modelInfo = await apiService.fetchModelSpec(meta);
   } catch (error, stackTrace) {

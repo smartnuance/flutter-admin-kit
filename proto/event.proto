@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+option go_package = "github.com/smartnuance/saas-kit/pkg/event";
+
+import "google/protobuf/timestamp.proto";
+import "proto/paging.proto";
+import "proto/auth.proto";
+import "proto/spec.proto";
+
+service EventService {
+  rpc GetWorkshops(Paging) returns (WorkshopList) {}
+  rpc CreateWorkshop(Workshop) returns (Workshop) {}
+}
+
+message Event {
+  option (spec.model) = {
+    name : "event"
+    service : "event"
+    label : "Event"
+    labelPlural : "Events"
+    idField : 1
+  };
+
+  string id = 1 [ (spec.field) = {
+    string : {
+      readOnly : true,
+      maxLength : 20,
+    }
+  } ];
+  Instance instance = 2 [ (spec.field) = {
+    string : {
+      required : true,
+    }
+  } ];
+  Info eventInfo = 3 [ (spec.field) = {content : {}} ];
+  google.protobuf.Timestamp starts = 4 [ (spec.field) = {datetime : {}} ];
+  ;
+  google.protobuf.Timestamp ends = 5 [ (spec.field) = {datetime : {}} ];
+  repeated Workshop workshops = 6 [ (spec.field) = {relational : {}} ];
+
+  message Info {
+    string title = 1 [ (spec.field) = {
+      string : {
+        maxLength : 255,
+      }
+    } ];
+    string slug = 2 [ (spec.field) = {
+      string : {
+        readOnly : true,
+        maxLength : 50,
+      }
+    } ];
+    string locationName = 3 [ (spec.field) = {
+      string : {
+        maxLength : 255,
+      }
+    } ];
+    string locationURL = 4 [ (spec.field) = {
+      string : {
+        maxLength : 255,
+      }
+    } ];
+  }
+}
+
+message Workshop {
+  option (spec.model) = {
+    name : "workshop"
+    service : "workshop"
+    label : "Workshop"
+    labelPlural : "Workshops"
+    idField : 1
+  };
+
+  string id = 1 [ (spec.field) = {
+    string : {
+      readOnly : true,
+      maxLength : 20,
+    }
+  } ];
+  string instance = 2 [ (spec.field) = {
+    string : {
+      required : true,
+    }
+  } ];
+  Info workshopInfo = 3 [ (spec.field) = {content : {}} ];
+  google.protobuf.Timestamp starts = 4 [ (spec.field) = {datetime : {}} ];
+  ;
+  google.protobuf.Timestamp ends = 5 [ (spec.field) = {datetime : {}} ];
+
+  oneof belongsTo {
+    option (spec.choices) = {
+      relational : {required : true}
+    };
+    Event event = 6;
+    string eventID = 7;
+  }
+
+  message Info {
+    string title = 1 [ (spec.field) = {
+      string : {
+        maxLength : 255,
+      }
+    } ];
+    string slug = 2 [ (spec.field) = {
+      string : {
+        readOnly : true,
+        maxLength : 50,
+      }
+    } ];
+    string locationName = 3 [ (spec.field) = {
+      string : {
+        maxLength : 255,
+      }
+    } ];
+    string locationURL = 4 [ (spec.field) = {
+      string : {
+        maxLength : 255,
+      }
+    } ];
+    bool couples = 5 [ (spec.field) = {
+      bool : {
+        required : true,
+      }
+    } ];
+  }
+}
+
+message WorkshopList {
+  option (spec.model_list) = {
+    name : "event"
+    service : "event"
+    label : "Event List"
+  };
+
+  repeated Workshop items = 1;
+  Paging paging = 2;
+}

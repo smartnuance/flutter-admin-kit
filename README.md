@@ -34,8 +34,11 @@ flutter channel stable
 flutter upgrade
 
 flutter packages pub global activate webdev
-```
 
+dart pub global activate protoc_plugin
+
+protoc -I=. --dart_out=./lib ./proto/* google/protobuf/timestamp.proto
+```
 
 To run the admin from terminal
 

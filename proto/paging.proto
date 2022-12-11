@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option go_package = "github.com/smartnuance/saas-kit/pkg/lib/paging";
+
+message PageSpec {
+    oneof page {
+        Paging.First first = 1;
+        Paging.Previous prev = 2;
+        Paging.Next next = 3;
+        Paging.Current cur = 4;
+    }
+}
+
+message Paging {
+  Previous prev = 1;
+  Current cur = 2;
+  Next next = 3;
+
+  // First describes the first page of a collection of items.
+  //
+  // It's no more than a wrapped page size.
+  message First {
+    int32 pageSize = 1; // The size (number of items) of the first page.
+  }
+
+  // A Previous describes the previous page of the current one.
+  //
+  // It does not explicitely identify the first item to be stable upon inserts.
+  message Previous {
+    string end = 1; // End of the previous page idenfied by the first item's ID on the
+           // successing page (usually equals to the current page).
+    int32 pageSize = 2; // The size (number of items) of a previous page.
+  }
+
+  // A Next describes the next page of the current one.
+  //
+  // It does not explicitely identify the last item to be stable upon inserts.
+  message Next {
+    string start =
+        1; // Start of the next page idenfied by the last item's ID on the
+           // preceding page (usually equals to the current page).
+    int32 pageSize = 2; // The size (number of items) of a next page.
+  }
+
+  message Current {
+    string start = 1;   // Start of the a page idenfied by the first item's ID.
+    string end = 2;     // End of the a page idenfied by the last item's ID.
+    int32 pageSize = 3; // The size (number of items) of a page.
+  }
+}

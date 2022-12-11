@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/smartnuance/saas-kit/pkg/auth";
+
+enum Role {
+  NO_ROLE = 0;
+  ROLE_SUPER_ADMIN = 1;
+  ROLE_INSTANCE_ADMIN = 2;
+  ROLE_EVENT_ORGANIZER = 3;
+  ROLE_TEACHER = 4;
+}
+
+message Instance {
+  string id = 1;
+  string name = 2;
+  string URL = 3;
+}
